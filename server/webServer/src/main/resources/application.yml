@@ -12,11 +12,12 @@ spring:
       hibernate:
         format_sql: true
     database: mysql
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
 
 server:
   port: 9000
 
 security:
   signInKey: 4226452948404D635166546A576E5A7234753778214125432A462D4A614E6452
-  tokenDuration: 24 * 60 * 60 * 1000
+  tokenDuration: 86400000

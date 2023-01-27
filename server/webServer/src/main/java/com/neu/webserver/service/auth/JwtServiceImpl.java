@@ -22,7 +22,7 @@ public class JwtServiceImpl implements JwtService {
     private String signInKey;
 
     @Value("${security.tokenDuration}")
-    private int tokenDuration;
+    private String tokenDuration;
 
     @Override
     public String extractUsername(String token) {
@@ -43,7 +43,7 @@ public class JwtServiceImpl implements JwtService {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 // 1 day expiration time
-                .setExpiration(new Date(System.currentTimeMillis() + tokenDuration))
+                .setExpiration(new Date(System.currentTimeMillis() + Integer.parseInt(tokenDuration)))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

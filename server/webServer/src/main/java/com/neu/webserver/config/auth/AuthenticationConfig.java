@@ -1,7 +1,7 @@
 package com.neu.webserver.config.auth;
 
 import com.neu.webserver.repository.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,14 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 @Configuration
-public class SecurityConfig {
+@RequiredArgsConstructor
+public class AuthenticationConfig {
 
     private final UserRepository userRepository;
-
-    @Autowired
-    public SecurityConfig(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -35,7 +31,7 @@ public class SecurityConfig {
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService());
-        authenticationProvider.setPasswordEncoder(passwordDecoder());
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
     }
 
@@ -45,9 +41,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordDecoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 
 }

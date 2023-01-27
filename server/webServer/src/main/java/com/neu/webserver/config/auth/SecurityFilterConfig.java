@@ -1,7 +1,6 @@
 package com.neu.webserver.config.auth;
 
-import com.neu.webserver.repository.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -10,31 +9,28 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityFilterConfig {
 
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthFilter;
 
-    @Autowired
-    public SecurityFilterConfig(AuthenticationProvider authenticationProvider,
-                          JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.authenticationProvider = authenticationProvider;
-        this.jwtAuthFilter = jwtAuthenticationFilter;
-    }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // enable cors and disable csrf
-        http.cors().and().csrf().disable();
-
-        // set permission endpoints and session
         http
+                // enable cors and disable csrf
+                .cors()
+                .and()
+                .csrf().disable()
+                // set permission endpoints and session
                 .authorizeHttpRequests()
-                .requestMatchers("")
-                .permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -45,5 +41,18 @@ public class SecurityFilterConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("*");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
     }
 }

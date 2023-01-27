@@ -1,7 +1,5 @@
 package com.neu.webserver.config.auth;
 
-import com.neu.webserver.entity.user.User;
-import com.neu.webserver.repository.user.UserRepository;
 import com.neu.webserver.service.auth.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,22 +10,20 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final SecurityConfig securityConfig;
+    private final AuthenticationConfig securityConfig;
 
     @Autowired
-    public JwtAuthenticationFilter(JwtService jwtService, SecurityConfig securityConfig) {
+    public JwtAuthenticationFilter(JwtService jwtService, AuthenticationConfig securityConfig) {
         this.jwtService = jwtService;
         this.securityConfig = securityConfig;
     }
