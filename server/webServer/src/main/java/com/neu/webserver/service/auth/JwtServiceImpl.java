@@ -1,4 +1,4 @@
-package com.neu.webserver.service.security;
+package com.neu.webserver.service.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

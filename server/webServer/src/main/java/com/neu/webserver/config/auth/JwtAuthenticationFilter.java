@@ -1,6 +1,8 @@
-package com.neu.webserver.configuration.security;
+package com.neu.webserver.config.auth;
 
-import com.neu.webserver.service.security.JwtService;
+import com.neu.webserver.entity.user.User;
+import com.neu.webserver.repository.user.UserRepository;
+import com.neu.webserver.service.auth.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,15 +13,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -38,6 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // get user email from jwt token
         final String token = header.substring(7);
-        final String userEmail;
+        final String userEmail = jwtService.extractUserEmail(token);
+        Optional<User> user = userRepository.findByEmail(userEmail);
+
     }
 }

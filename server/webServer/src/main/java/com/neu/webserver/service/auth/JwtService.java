@@ -1,4 +1,4 @@
-package com.neu.webserver.service.security;
+package com.neu.webserver.service.auth;
 
 import io.jsonwebtoken.Claims;
 
@@ -18,7 +18,7 @@ public interface JwtService {
      * Extract a claim from token.
      *
      * @param token token
-     * @param claimsResolver function from Claims class
+     * @param claimsResolver claims resolver function
      * @return the property in the claim
      * @param <T> the property type
      */
