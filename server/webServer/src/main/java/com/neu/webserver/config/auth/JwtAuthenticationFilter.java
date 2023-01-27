@@ -9,6 +9,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,12 +24,12 @@ import java.util.Optional;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+    private final SecurityConfig securityConfig;
 
     @Autowired
-    public JwtAuthenticationFilter(JwtService jwtService, UserRepository userRepository) {
+    public JwtAuthenticationFilter(JwtService jwtService, SecurityConfig securityConfig) {
         this.jwtService = jwtService;
-        this.userRepository = userRepository;
+        this.securityConfig = securityConfig;
     }
 
     @Override
@@ -42,9 +47,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // get user email from jwt token
-        final String token = header.substring(7);
-        final String userEmail = jwtService.extractUserEmail(token);
-        Optional<User> user = userRepository.findByEmail(userEmail);
-
+        final String token = header.substring(7).trim();
+        final String userEmail = jwtService.extractUsername(token);
+        // if the user is not authenticated yet but exists in database
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            final UserDetails userDetails = securityConfig.userDetailsService().loadUserByUsername(userEmail);
+            // if token is valid, update security context
+            if (jwtService.verifyToken(token, userDetails)) {
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
+        }
+        filterChain.doFilter(request, response);
     }
 }
