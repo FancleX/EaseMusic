@@ -3,7 +3,7 @@ package com.neu.webserver.service.auth;
 import com.neu.webserver.entity.user.Role;
 import com.neu.webserver.entity.user.User;
 import com.neu.webserver.exception.auth.AlreadyExistsException;
-import com.neu.webserver.exception.auth.MissingRegisterInformationException;
+import com.neu.webserver.exception.auth.MissingRegistryInformationException;
 import com.neu.webserver.protocol.auth.request.AuthRequest;
 import com.neu.webserver.protocol.auth.request.RegisterRequest;
 import com.neu.webserver.protocol.auth.response.AuthResponse;
@@ -43,7 +43,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .role(Role.USER)
                     .build();
         } catch (NullPointerException | IllegalArgumentException | AuthenticationException e) {
-            throw new MissingRegisterInformationException("Missing information to register an account");
+            throw new MissingRegistryInformationException("Missing information to register an account");
         }
 
         userRepository.save(newUser);

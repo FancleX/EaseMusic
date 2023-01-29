@@ -1,5 +1,6 @@
 package com.neu.webserver.entity.user;
 
+import com.neu.webserver.entity.media.MediaShort;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -7,18 +8,17 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-@Entity
+
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Entity
 @Table(name = "_user")
 public class User implements UserDetails {
 
@@ -37,6 +37,11 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinColumn(name = "favorites")
+    @ToString.Exclude
+    private Set<MediaShort> favorites = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

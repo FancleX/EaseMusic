@@ -9,7 +9,7 @@ public interface AuthenticationService {
     /**
      * User sign up.
      *
-     * @param request request include sign up information
+     * @param request request includes sign up information
      * @return response with authenticate message
      */
     AuthResponse signUp(RegisterRequest request);
@@ -17,7 +17,7 @@ public interface AuthenticationService {
     /**
      * User sign in.
      *
-     * @param request request include sign in information
+     * @param request request includes sign in information
      * @return response with authenticate message
      */
     AuthResponse signIn(AuthRequest request);

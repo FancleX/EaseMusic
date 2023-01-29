@@ -1,4 +1,4 @@
-package com.neu.webserver.protocol.auth.exception;
+package com.neu.webserver.protocol.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
