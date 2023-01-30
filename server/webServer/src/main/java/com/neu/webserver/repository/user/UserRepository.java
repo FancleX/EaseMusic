@@ -20,8 +20,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query(value = "UPDATE _user SET password = :password WHERE email = :email", nativeQuery = true)
     void updatePassword(@Param("email") String email, @Param("password") String password);
 
-    @Query(value = "SELECT user_favorites FROM _user WHERE email = :email ORDER BY addedDate ASC OFFSET :offset LIMIT :limit", nativeQuery = true)
-    List<MediaShort> getOrderedFavorites(@Param("email") String email, @Param("offset") int offset, @Param("limit") int limit);
+    @Query(value = "SELECT user_favorites.uuid FROM _user " +
+            "INNER JOIN user_favorites ON _user.id = user_favorites.user_id WHERE email = :email " +
+            "ORDER BY added_date ASC LIMIT :limit OFFSET :offset",
+            nativeQuery = true
+    )
+    List<String> getOrderedFavorites(@Param("email") String email, @Param("limit") int limit, @Param("offset") int offset);
 
 
 }

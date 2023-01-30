@@ -3,21 +3,22 @@ package com.neu.webserver.service.user;
 import com.neu.webserver.entity.media.MediaShort;
 import com.neu.webserver.entity.user.User;
 import com.neu.webserver.exception.user.IncorrectPasswordException;
-import com.neu.webserver.protocol.auth.response.AuthResponse;
-import com.neu.webserver.protocol.user.request.FavoriteGetRequest;
 import com.neu.webserver.protocol.user.request.FavoriteUpdateRequest;
 import com.neu.webserver.protocol.user.request.PasswordRequest;
 import com.neu.webserver.protocol.user.request.UsernameRequest;
 import com.neu.webserver.protocol.user.response.FavoriteUpdateResponse;
 import com.neu.webserver.protocol.user.response.PasswordResponse;
 import com.neu.webserver.protocol.user.response.UsernameResponse;
+import com.neu.webserver.repository.media.MediaShortRepository;
 import com.neu.webserver.repository.user.UserRepository;
 import com.neu.webserver.service.auth.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final MediaShortRepository mediaShortRepository;
 
     @Override
     public UsernameResponse updateUsername(UserDetails userDetails, UsernameRequest request) {
@@ -35,8 +37,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public PasswordResponse updatePassword(UserDetails userDetails, PasswordRequest request) {
-        if (!userDetails.getPassword().equals(passwordEncoder.encode(request.getOldPassword()))) {
+        System.out.println(userDetails.getPassword());
+        if (!passwordEncoder.matches(request.getOldPassword(), userDetails.getPassword())) {
             throw new IncorrectPasswordException("Incorrect old password");
         }
         String password = request.getNewPassword();
@@ -52,17 +56,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public FavoriteUpdateResponse getAllFavorites(UserDetails userDetails, FavoriteGetRequest request) {
-        String email = userDetails.getUsername();
-
-        List<MediaShort> favorites = userRepository
+    public FavoriteUpdateResponse getFavorites(UserDetails userDetails, int currentIndex, int limit) {
+        List<String> favorites = userRepository
                 .getOrderedFavorites(
-                        email,
-                        request.getCurrentIndex() * request.getLimit(),
-                        request.getLimit()
+                        userDetails.getUsername(),
+                        limit,
+                        currentIndex * limit
                 );
 
-        return new FavoriteUpdateResponse(favorites);
+        return FavoriteUpdateResponse
+                .builder()
+                .favorites(favorites)
+                .currentIndex(currentIndex)
+                .limit(limit)
+                .build();
     }
 
     @Override
@@ -73,21 +80,30 @@ public class UserServiceImpl implements UserService {
 
         MediaShort media = MediaShort
                 .builder()
+                .user(user)
                 .uuid(request.getUuid())
                 .addedDate(new Date())
                 .build();
 
-        user.getFavorites().add(media);
+        try {
+            mediaShortRepository.save(media);
+        } catch (Exception ignore) {
+            // ignore duplicate add exception
+        }
 
-        userRepository.save(user);
-
-        List<MediaShort> favorites = userRepository
+        List<String> favorites = userRepository
                 .getOrderedFavorites(
                         user.getEmail(),
-                        request.getCurrentIndex() * request.getLimit(),
-                        request.getLimit());
+                        request.getLimit(),
+                        request.getCurrentIndex() * request.getLimit()
+                );
 
-        return new FavoriteUpdateResponse(favorites);
+        return FavoriteUpdateResponse
+                .builder()
+                .favorites(favorites)
+                .currentIndex(request.getCurrentIndex())
+                .limit(request.getLimit())
+                .build();
     }
 
     @Override

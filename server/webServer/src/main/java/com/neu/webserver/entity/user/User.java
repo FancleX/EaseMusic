@@ -38,10 +38,9 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    @JoinColumn(name = "favorites")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    private Set<MediaShort> favorites = new HashSet<>();
+    private Set<MediaShort> favorites;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

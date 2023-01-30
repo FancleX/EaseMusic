@@ -8,7 +8,14 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class FavoriteUpdateResponse {
 
-    private List<MediaShort> favorites;
+    // TODO: create a new response type for favorites,
+    //  search by uuids through search search service,
+    //  return resource list, an entity should include
+    //  uuid, thumbnail, title, author
+    private List<String> favorites;
+    private int currentIndex;
+    private int limit;
 }

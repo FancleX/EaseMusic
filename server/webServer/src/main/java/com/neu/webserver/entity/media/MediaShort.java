@@ -1,31 +1,38 @@
 package com.neu.webserver.entity.media;
 
+import com.neu.webserver.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Proxy;
 
 import java.util.Date;
 import java.util.Objects;
 
+
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "user_favorites", uniqueConstraints = @UniqueConstraint(columnNames = {"uuid"}))
+@Table(name = "user_favorites", uniqueConstraints = @UniqueConstraint(columnNames = {"uuid", "user_id"}))
+@Proxy(lazy = false)
 public class MediaShort {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "uuid", unique = true)
+    @Column(name = "uuid")
     private String uuid;
 
     // use for sorting
     private Date addedDate;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Override
     public boolean equals(Object o) {

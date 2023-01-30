@@ -1,6 +1,5 @@
 package com.neu.webserver.service.user;
 
-import com.neu.webserver.protocol.user.request.FavoriteGetRequest;
 import com.neu.webserver.protocol.user.request.FavoriteUpdateRequest;
 import com.neu.webserver.protocol.user.request.PasswordRequest;
 import com.neu.webserver.protocol.user.request.UsernameRequest;
@@ -33,10 +32,11 @@ public interface UserService {
      * Get all favorites of the user.
      *
      * @param userDetails authenticated user
-     * @param request request to get favorites by index
+     * @param currentIndex current page index
+     * @param limit limit per page
      * @return response with a sorted favorites list in time according order by page
      */
-    FavoriteUpdateResponse getAllFavorites(UserDetails userDetails, FavoriteGetRequest request);
+    FavoriteUpdateResponse getFavorites(UserDetails userDetails, int currentIndex, int limit);
 
     /**
      * Add a media to favorites.

@@ -1,7 +1,5 @@
 package com.neu.webserver.controller.user;
 
-import com.neu.webserver.entity.media.MediaShort;
-import com.neu.webserver.protocol.user.request.FavoriteGetRequest;
 import com.neu.webserver.protocol.user.request.FavoriteUpdateRequest;
 import com.neu.webserver.protocol.user.request.PasswordRequest;
 import com.neu.webserver.protocol.user.request.UsernameRequest;
@@ -43,11 +41,12 @@ public class UserController {
     // get all favorites
 
     @GetMapping("/get/favorites")
-    public ResponseEntity<FavoriteUpdateResponse> getAllFavorites(
+    public ResponseEntity<FavoriteUpdateResponse> getFavorites(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody FavoriteGetRequest request
+            @RequestParam("index") int currentIndex,
+            @RequestParam("limit") int limit
             ) {
-        return ResponseEntity.ok(userService.getAllFavorites(userDetails, request));
+        return ResponseEntity.ok(userService.getFavorites(userDetails, currentIndex, limit));
     }
 
     // add to favorite list
