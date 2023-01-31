@@ -1,6 +1,6 @@
 package com.neu.webserver.service.user;
 
-import com.neu.webserver.entity.media.MediaShort;
+import com.neu.webserver.entity.user.MediaShort;
 import com.neu.webserver.entity.user.User;
 import com.neu.webserver.exception.user.IncorrectPasswordException;
 import com.neu.webserver.protocol.user.request.FavoriteUpdateRequest;
@@ -18,7 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
 import java.util.List;
 
@@ -64,9 +63,10 @@ public class UserServiceImpl implements UserService {
                         currentIndex * limit
                 );
 
+        // TODO: inject search service to fetch favorites detail based on the attribute uuid
         return FavoriteUpdateResponse
                 .builder()
-                .favorites(favorites)
+//                .favorites(favorites)
                 .currentIndex(currentIndex)
                 .limit(limit)
                 .build();
@@ -98,9 +98,10 @@ public class UserServiceImpl implements UserService {
                         request.getCurrentIndex() * request.getLimit()
                 );
 
+        // TODO: inject search service to fetch favorites detail based on the attribute uuid
         return FavoriteUpdateResponse
                 .builder()
-                .favorites(favorites)
+//                .favorites(favorites)
                 .currentIndex(request.getCurrentIndex())
                 .limit(request.getLimit())
                 .build();

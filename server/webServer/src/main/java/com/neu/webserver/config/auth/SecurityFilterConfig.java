@@ -30,7 +30,8 @@ public class SecurityFilterConfig {
                 .csrf().disable()
                 // set permission endpoints and session
                 .authorizeHttpRequests()
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/api/v1/search/results").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

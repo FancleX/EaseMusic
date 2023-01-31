@@ -1,9 +1,7 @@
-package com.neu.webserver.entity.media;
+package com.neu.webserver.entity.user;
 
-import com.neu.webserver.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Proxy;
 
 import java.util.Date;
 import java.util.Objects;
@@ -17,7 +15,6 @@ import java.util.Objects;
 @Builder
 @Entity
 @Table(name = "user_favorites", uniqueConstraints = @UniqueConstraint(columnNames = {"uuid", "user_id"}))
-@Proxy(lazy = false)
 public class MediaShort {
 
     @Id

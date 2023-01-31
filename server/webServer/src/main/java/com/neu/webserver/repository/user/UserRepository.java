@@ -1,6 +1,5 @@
 package com.neu.webserver.repository.user;
 
-import com.neu.webserver.entity.media.MediaShort;
 import com.neu.webserver.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
