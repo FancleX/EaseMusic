@@ -7,5 +7,4 @@ public class MediaDetails {
     private String description;
     private String thumbnail;
     private String author;
-    private byte[] audio;
 }
