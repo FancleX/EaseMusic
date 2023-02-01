@@ -9,13 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-/**
- *
- * TODO: create a new response type for favorites,
- *  search by uuids through search search service,
- *  return resource list, an entity should include
- *  uuid, thumbnail, title, author
- */
 public class MediaPreview {
     private String uuid;
     private String thumbnail;

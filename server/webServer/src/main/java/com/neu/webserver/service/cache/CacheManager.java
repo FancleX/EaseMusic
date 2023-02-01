@@ -7,6 +7,12 @@ import java.util.List;
 
 public class CacheManager extends AbstractSearchHandlerChain {
 
+    private final CacheService serviceProvider;
+
+    public CacheManager(CacheService serviceProvider) {
+        this.serviceProvider = serviceProvider;
+    }
+
     @Override
     protected boolean canHandle(ChainPackage chainPackage) {
         return false;
