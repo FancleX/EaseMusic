@@ -13,9 +13,14 @@ public class SearchManager {
         this.chain = chain;
     }
 
-    public List<?> doSearch(ChainPackage request) {
-        this.chain.handle(request);
-        return request.getQueryResult();
+    public List<?> doSearch(String rawInput) {
+        ChainPackage chainPackage = ChainPackage
+                .builder()
+                .queryString(rawInput)
+                .build();
+
+        this.chain.handle(chainPackage);
+        return chainPackage.getQueryResult();
     }
 
 }

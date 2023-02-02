@@ -1,5 +1,6 @@
 package com.neu.webserver.entity.media;
 
+import com.neu.webserver.protocol.media.MediaPreview;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;

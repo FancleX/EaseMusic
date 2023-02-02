@@ -10,7 +10,7 @@ public abstract class AbstractSearchHandlerChain {
     protected AbstractSearchHandlerChain next;
 
     /**
-     * Set the next handler after the handler.
+     * Set the next handler of this handler.
      *
      * @param handler the next handler
      */
@@ -25,6 +25,15 @@ public abstract class AbstractSearchHandlerChain {
      * @return true if the current handler is able to handle the package, otherwise false
      */
     protected abstract boolean canHandle(ChainPackage chainPackage);
+
+    /**
+     * Determine if next handler is available.
+     *
+     * @return true if has next handler, otherwise false
+     */
+    protected boolean hasNext() {
+        return next != null;
+    }
 
     /**
      * Handle and process the package.
