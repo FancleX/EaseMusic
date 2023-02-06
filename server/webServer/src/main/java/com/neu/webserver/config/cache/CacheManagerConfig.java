@@ -1,34 +1,28 @@
 package com.neu.webserver.config.cache;
 
-import com.neu.webserver.service.cache.updater.CacheUpdater;
-import com.neu.webserver.service.cache.updater.MediaCacheUpdater;
-import com.neu.webserver.service.cache.updater.MetaCacheUpdater;
-import com.neu.webserver.service.cache.validator.CacheValidator;
-import com.neu.webserver.service.cache.validator.MediaCacheValidator;
-import com.neu.webserver.service.cache.validator.MetaCacheValidator;
+import com.neu.webserver.repository.media.MediaRepository;
+import com.neu.webserver.service.searchChain.cache.updater.CacheUpdater;
+import com.neu.webserver.service.searchChain.cache.updater.MetaCacheUpdater;
+import com.neu.webserver.service.searchChain.cache.validator.CacheEvaluator;
+import com.neu.webserver.service.searchChain.cache.validator.MetaCacheEvaluator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@RequiredArgsConstructor
 public class CacheManagerConfig {
+
+    private final MediaRepository mediaRepository;
 
     @Bean
     public CacheUpdater metaCacheUpdater() {
         return new MetaCacheUpdater();
     }
 
-    @Bean
-    public CacheUpdater mediaCacheUpdater() {
-        return new MediaCacheUpdater();
-    }
 
     @Bean
-    public CacheValidator metaCacheValidator() {
-        return new MetaCacheValidator();
-    }
-
-    @Bean
-    public CacheValidator mediaCacheValidator() {
-        return new MediaCacheValidator();
+    public CacheEvaluator metaCacheEvaluator() {
+        return new MetaCacheEvaluator(mediaRepository);
     }
 }

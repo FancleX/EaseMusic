@@ -1,6 +1,6 @@
 package com.neu.webserver.service.searchChain;
 
-import com.neu.webserver.protocol.search.chain.ChainPackage;
+import org.springframework.lang.NonNull;
 
 public abstract class AbstractSearchHandlerChain {
 
@@ -24,12 +24,12 @@ public abstract class AbstractSearchHandlerChain {
      * @param chainPackage the data package processed in the chain
      * @return true if the current handler is able to handle the package, otherwise false
      */
-    protected abstract boolean canHandle(ChainPackage chainPackage);
+    protected abstract boolean canHandle(@NonNull ChainPackage chainPackage);
 
     /**
      * Determine if next handler is available.
      *
-     * @return true if has next handler, otherwise false
+     * @return true if this node has next handler, otherwise false
      */
     protected boolean hasNext() {
         return next != null;
@@ -41,5 +41,15 @@ public abstract class AbstractSearchHandlerChain {
      * @param chainPackage the data package processed in the chain
      */
     public abstract void handle(ChainPackage chainPackage);
+
+    /**
+     * Determine if the current task is completed.
+     *
+     * @param chainPackage the data package processed in the chain
+     * @return true if the package indicates complete status, otherwise false
+     */
+    protected boolean isCompleted(ChainPackage chainPackage) {
+        return chainPackage.getNextStage().equals(ChainPackage.Status.COMPLETED);
+    }
 
 }

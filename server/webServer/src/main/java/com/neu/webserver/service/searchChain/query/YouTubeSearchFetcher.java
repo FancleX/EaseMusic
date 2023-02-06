@@ -1,24 +1,22 @@
-package com.neu.webserver.service.query;
+package com.neu.webserver.service.searchChain.query;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResultSnippet;
-import com.neu.webserver.exception.search.NoHandlerHandlesChainPackageException;
 import com.neu.webserver.exception.search.UnableConnectYouTubeServiceException;
 import com.neu.webserver.protocol.media.MediaPreview;
-import com.neu.webserver.protocol.search.chain.ChainPackage;
 import com.neu.webserver.service.searchChain.AbstractSearchHandlerChain;
+import com.neu.webserver.service.searchChain.ChainPackage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.lang.NonNull;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 @RequiredArgsConstructor
 public class YouTubeSearchFetcher extends AbstractSearchHandlerChain implements QueryService {
 
@@ -27,11 +25,9 @@ public class YouTubeSearchFetcher extends AbstractSearchHandlerChain implements 
     private String DEVELOPER_KEY;
 
     @Override
-    protected boolean canHandle(ChainPackage chainPackage) {
-        return chainPackage != null
-                && chainPackage.getQueryString() != null
-                && !chainPackage.getQueryString().isBlank()
-                && chainPackage.getQueryResult() == null;
+    protected boolean canHandle(@NonNull ChainPackage chainPackage) {
+        return chainPackage.getQueryString() != null
+                && !chainPackage.getQueryString().isBlank();
     }
 
     @Override
@@ -41,9 +37,8 @@ public class YouTubeSearchFetcher extends AbstractSearchHandlerChain implements 
                 super.next.handle(chainPackage);
                 return;
             }
-            throw new NoHandlerHandlesChainPackageException("Chain package reaches the end of search chain," +
-                    " and no handler found to handle it");
         }
+
         List<MediaPreview> queryResults = doQuery(chainPackage.getQueryString());
         chainPackage.setQueryResult(queryResults);
 
@@ -61,10 +56,11 @@ public class YouTubeSearchFetcher extends AbstractSearchHandlerChain implements 
 
             SearchListResponse searchListResponse = request
                     .setKey(DEVELOPER_KEY)
+                    .setType(Collections.singletonList("video"))
                     .setChannelType("any")
                     .setMaxResults(50L)
                     .setOrder("relevance")
-                    .setQ("software")
+                    .setQ(rawInput)
                     .setType(Collections.singletonList("video"))
                     .setVideoCaption("any")
                     .setVideoDefinition("any")

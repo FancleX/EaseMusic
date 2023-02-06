@@ -1,4 +1,4 @@
-package com.neu.webserver.service.query;
+package com.neu.webserver.service.searchChain.query;
 
 import com.neu.webserver.protocol.media.MediaPreview;
 

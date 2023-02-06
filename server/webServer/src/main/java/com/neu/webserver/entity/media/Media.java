@@ -1,17 +1,16 @@
 package com.neu.webserver.entity.media;
 
-import com.neu.webserver.protocol.media.MediaPreview;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
 
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
@@ -29,6 +28,9 @@ public class Media {
     private String thumbnail;
     private String author;
     private String audioPath;
+    private String hashCode;
+    @ElementCollection(targetClass = String.class)
+    private Set<String> relatedTopics;
 
     @Override
     public boolean equals(Object o) {

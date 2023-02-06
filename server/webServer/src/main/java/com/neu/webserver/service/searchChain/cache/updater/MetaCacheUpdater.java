@@ -1,11 +1,12 @@
-package com.neu.webserver.service.cache.updater;
+package com.neu.webserver.service.searchChain.cache.updater;
 
-import com.neu.webserver.protocol.search.chain.ChainPackage;
 import com.neu.webserver.service.searchChain.AbstractSearchHandlerChain;
+import com.neu.webserver.service.searchChain.ChainPackage;
+import org.springframework.lang.NonNull;
 
 public class MetaCacheUpdater extends AbstractSearchHandlerChain implements CacheUpdater {
     @Override
-    protected boolean canHandle(ChainPackage chainPackage) {
+    protected boolean canHandle(@NonNull ChainPackage chainPackage) {
         return false;
     }
 

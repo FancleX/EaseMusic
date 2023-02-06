@@ -1,6 +1,5 @@
 package com.neu.webserver.protocol.media;
 
-import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
