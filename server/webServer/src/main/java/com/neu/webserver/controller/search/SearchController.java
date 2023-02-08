@@ -1,6 +1,5 @@
 package com.neu.webserver.controller.search;
 
-import com.neu.webserver.protocol.media.MediaPreview;
 import com.neu.webserver.service.search.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,7 @@ public class SearchController {
 
     // search raw user input
     @GetMapping("/results")
-    public ResponseEntity<List<MediaPreview>> searchRawQuery(@RequestParam("search_query") String query, @RequestParam("page_index") int pageIndex) {
+    public ResponseEntity<List<?>> searchRawQuery(@RequestParam("search_query") String query, @RequestParam("page_index") int pageIndex) {
         return ResponseEntity.ok(searchService.searchRawQuery(query, pageIndex));
     }
 

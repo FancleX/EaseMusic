@@ -1,7 +1,5 @@
 package com.neu.webserver.service.search;
 
-import com.neu.webserver.protocol.media.MediaPreview;
-
 import java.util.List;
 
 public interface SearchService {
@@ -13,7 +11,7 @@ public interface SearchService {
      * @param pageIndex the page index
      * @return a list of media meta results
      */
-    List<MediaPreview> searchRawQuery(String query, int pageIndex);
+    List<?> searchRawQuery(String query, int pageIndex);
 
     /**
      * TODO: Search for the specific audio source by given the uuid.

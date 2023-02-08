@@ -37,13 +37,12 @@ public class MetaCacheUpdater extends AbstractSearchHandlerChain implements Cach
         }
 
         // get recent fetch from YouTube, cache them in database
-        List<MediaPreview> queryResult = chainPackage.getQueryResult();
+        List<?> queryResult = chainPackage.getQueryResult();
 
         saveInstances(chainPackage.getQueryString(), queryResult);
-        List<Media> result = mediaRepository.getMediaPreviewByPage(chainPackage.getQueryString(), entriesPerPage, chainPackage.getOffset());
-        List<MediaPreview> previews = result.stream().map(media -> media.extractFromMedia(Media::mediaPreviewExtractor)).toList();
+        List<?> result = mediaRepository.getMediaPreviewByPage(chainPackage.getQueryString(), entriesPerPage, chainPackage.getOffset());
 
-        chainPackage.setQueryResult(previews);
+        chainPackage.setQueryResult(result);
         chainPackage.setNextStage(ChainPackage.Status.COMPLETED);
 
         super.next.handle(chainPackage);
@@ -51,31 +50,37 @@ public class MetaCacheUpdater extends AbstractSearchHandlerChain implements Cach
 
     @Override
     @Transactional
-    public void saveInstances(String topic, List<MediaPreview> mediaList) {
+    public void saveInstances(String topic, List<?> mediaList) {
         mediaList
-                .forEach(mediaPreview -> mediaRepository.findByUuid(mediaPreview.getUuid())
-                        .ifPresentOrElse(
-                                media -> {
-                                    media.getRelatedTopics().add(topic);
-                                    mediaRepository.save(media);
-                                },
-                                () -> {
-                                    Set<String> topicsSet = new HashSet<>();
-                                    topicsSet.add(topic);
+                .forEach(mediaPreview -> {
+                            MediaPreview preview = (MediaPreview) mediaPreview;
 
-                                    Media media = Media
-                                            .builder()
-                                            .title(mediaPreview.getTitle())
-                                            .uuid(mediaPreview.getUuid())
-                                            .author(mediaPreview.getAuthor())
-                                            .thumbnail(mediaPreview.getThumbnail())
-                                            .description(mediaPreview.getDescription())
-                                            .relatedTopics(topicsSet)
-                                            .build();
+                            mediaRepository
+                                    .findByUuid(preview.getUuid())
+                                    .ifPresentOrElse(
+                                            media -> {
+                                                assert media.getRelatedTopics() != null;
+                                                media.getRelatedTopics().add(topic);
+                                                mediaRepository.save(media);
+                                            },
+                                            () -> {
+                                                Set<String> topicsSet = new HashSet<>();
+                                                topicsSet.add(topic);
 
-                                    mediaRepository.save(media);
-                                }
-                        )
+                                                Media media = Media
+                                                        .builder()
+                                                        .title(preview.getTitle())
+                                                        .uuid(preview.getUuid())
+                                                        .author(preview.getAuthor())
+                                                        .thumbnail(preview.getThumbnail())
+                                                        .description(preview.getDescription())
+                                                        .relatedTopics(topicsSet)
+                                                        .build();
+
+                                                mediaRepository.save(media);
+                                            }
+                                    );
+                        }
                 );
     }
 }

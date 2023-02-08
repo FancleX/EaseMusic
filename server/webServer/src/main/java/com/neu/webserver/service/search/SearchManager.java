@@ -1,6 +1,5 @@
 package com.neu.webserver.service.search;
 
-import com.neu.webserver.protocol.media.MediaPreview;
 import com.neu.webserver.service.searchChain.AbstractSearchHandlerChain;
 import com.neu.webserver.service.searchChain.ChainPackage;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,7 @@ import java.util.List;
 public class SearchManager {
     private final AbstractSearchHandlerChain chain;
 
-    public List<MediaPreview> doSearch(String rawInput, int pageIndex) {
+    public List<?> doSearch(String rawInput, int pageIndex) {
 
         final ChainPackage chainPackage = ChainPackage
                 .builder()

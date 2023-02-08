@@ -1,8 +1,6 @@
 package com.neu.webserver.service.searchChain.cache.updater;
 
 
-import com.neu.webserver.protocol.media.MediaPreview;
-
 import java.util.List;
 
 public interface CacheUpdater {
@@ -14,5 +12,5 @@ public interface CacheUpdater {
      * @param topic     a topic relates to those instances
      * @param mediaList instance list
      */
-    void saveInstances(String topic, List<MediaPreview> mediaList);
+    void saveInstances(String topic, List<?> mediaList);
 }

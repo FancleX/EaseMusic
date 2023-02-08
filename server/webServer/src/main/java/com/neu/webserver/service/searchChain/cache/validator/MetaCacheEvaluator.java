@@ -1,7 +1,5 @@
 package com.neu.webserver.service.searchChain.cache.validator;
 
-import com.neu.webserver.entity.media.Media;
-import com.neu.webserver.protocol.media.MediaPreview;
 import com.neu.webserver.repository.media.MediaRepository;
 import com.neu.webserver.service.searchChain.AbstractSearchHandlerChain;
 import com.neu.webserver.service.searchChain.ChainPackage;
@@ -45,7 +43,7 @@ public class MetaCacheEvaluator extends AbstractSearchHandlerChain implements Ca
         }
 
         // has enough amount of query results
-        List<MediaPreview> entries = getEntriesByPage(queryString, chainPackage.getOffset());
+        List<?> entries = getEntriesByPage(queryString, chainPackage.getOffset());
 
         chainPackage.setQueryResult(entries);
         chainPackage.setNextStage(ChainPackage.Status.COMPLETED);
@@ -58,9 +56,8 @@ public class MetaCacheEvaluator extends AbstractSearchHandlerChain implements Ca
     }
 
     @Override
-    public List<MediaPreview> getEntriesByPage(@NonNull String queryString, int offset) {
-        List<Media> mediaList = mediaRepository.getMediaPreviewByPage(queryString, entriesPerPage, offset);
-        return mediaList.stream().map(media -> media.extractFromMedia(Media::mediaPreviewExtractor)).toList();
+    public List<?> getEntriesByPage(@NonNull String queryString, int offset) {
+        return mediaRepository.getMediaPreviewByPage(queryString, entriesPerPage, offset);
     }
 
 }

@@ -26,14 +26,14 @@ public interface MediaRepository extends JpaRepository<Media, Long> {
     int getEntryAmount(@Param("queryString") String queryString);
 
     @Query(value = """
-                SELECT *
+                SELECT uuid, title, author, description, thumbnail
                 FROM media
                 INNER JOIN media_related_topics
                     ON media.id = media_related_topics.media_id
                 WHERE related_topics LIKE CONCAT('%', :queryString, '%')
                 LIMIT :limit OFFSET :offset
             """, nativeQuery = true)
-    List<Media> getMediaPreviewByPage(@Param("queryString") String queryString,
-                                      @Param("limit") int limit,
-                                      @Param("offset") int offset);
+    List<Object> getMediaPreviewByPage(@Param("queryString") String queryString,
+                                       @Param("limit") int limit,
+                                       @Param("offset") int offset);
 }

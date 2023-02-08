@@ -1,18 +1,17 @@
 package com.neu.webserver.entity.media;
 
-import com.neu.webserver.protocol.media.MediaPreview;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
@@ -21,7 +20,8 @@ public class Media {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @Nullable
+    private Long id;
     @Column(unique = true)
     private String uuid;
     private String title;
@@ -29,9 +29,12 @@ public class Media {
     private String description;
     private String thumbnail;
     private String author;
+    @Nullable
     private String audioPath;
+    @Nullable
     private String hashCode;
     @ElementCollection(targetClass = String.class)
+    @Nullable
     private Set<String> relatedTopics;
 
     @Override
@@ -45,20 +48,5 @@ public class Media {
     @Override
     public int hashCode() {
         return Objects.hashCode(uuid);
-    }
-
-    public <T> T extractFromMedia(Function<Media, T> extractor) {
-        return extractor.apply(this);
-    }
-
-    public MediaPreview mediaPreviewExtractor() {
-        return MediaPreview
-                .builder()
-                .uuid(uuid)
-                .title(title)
-                .author(author)
-                .thumbnail(thumbnail)
-                .description(description)
-                .build();
     }
 }

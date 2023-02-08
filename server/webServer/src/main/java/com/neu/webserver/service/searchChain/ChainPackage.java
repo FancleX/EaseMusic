@@ -1,6 +1,5 @@
 package com.neu.webserver.service.searchChain;
 
-import com.neu.webserver.protocol.media.MediaPreview;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +13,7 @@ import java.util.List;
 @Builder
 public class ChainPackage {
 
-    private List<MediaPreview> queryResult;
+    private List<?> queryResult;
 
     private String queryString;
     private Status nextStage;
