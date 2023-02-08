@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -19,18 +20,17 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query(value = "UPDATE _user SET password = :password WHERE email = :email", nativeQuery = true)
     void updatePassword(@Param("email") String email, @Param("password") String password);
 
-    @Query(value =
-            """
-                        SELECT user_favorites.uuid 
-                        FROM _user
-                        INNER JOIN user_favorites 
-                            ON _user.id = user_favorites.user_id 
-                        WHERE email = :email
-                        ORDER BY added_date ASC 
-                        LIMIT :limit OFFSET :offset
-                    """,
+    @Query(value = """
+                         SELECT user_favorites.uuid, m.title, m.author, m.thumbnail, m.description
+                         FROM user_favorites
+                         JOIN _user u ON u.id = user_favorites.user_id
+                         JOIN media m ON user_favorites.uuid = m.uuid
+                         WHERE u.email = :email
+                         ORDER BY user_favorites.added_date ASC
+                         LIMIT :limit OFFSET :offset
+            """,
             nativeQuery = true)
-    List<String> getOrderedFavorites(@Param("email") String email,
-                                     @Param("limit") int limit,
-                                     @Param("offset") int offset);
+    List<Map<String, ?>> getOrderedFavorites(@Param("email") String email,
+                                             @Param("limit") int limit,
+                                             @Param("offset") int offset);
 }

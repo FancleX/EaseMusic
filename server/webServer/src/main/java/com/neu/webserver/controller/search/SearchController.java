@@ -23,9 +23,6 @@ public class SearchController {
         return ResponseEntity.ok(searchService.searchRawQuery(query, pageIndex));
     }
 
-    // internal search a set of uuids
-
-
     // search a specific uuid
     // byte stream of the audio file
     @GetMapping("/detail")

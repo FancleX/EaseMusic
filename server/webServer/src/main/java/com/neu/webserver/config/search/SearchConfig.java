@@ -22,7 +22,6 @@ public class SearchConfig {
     }
 
     @Bean
-//    @Scope(value = "prototype")
     public AbstractSearchHandlerChain chain() {
         return new SearchChainBuilder()
                 .next(metaCacheEvaluator)
@@ -33,7 +32,6 @@ public class SearchConfig {
     }
 
     @Bean
-//    @Scope(value = "prototype")
     public SearchManager searchManager() {
         return new SearchManager(chain());
     }

@@ -1,7 +1,9 @@
 package com.neu.webserver.protocol.user.response;
 
-import com.neu.webserver.protocol.media.MediaPreview;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -11,7 +13,7 @@ import java.util.List;
 @Builder
 public class FavoriteUpdateResponse {
 
-    private List<MediaPreview> favorites;
+    private List<?> favorites;
     private int currentIndex;
     private int limit;
 }

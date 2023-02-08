@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -56,17 +57,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public FavoriteUpdateResponse getFavorites(UserDetails userDetails, int currentIndex, int limit) {
-        List<String> favorites = userRepository
-                .getOrderedFavorites(
-                        userDetails.getUsername(),
+        List<Map<String, ?>> favorites = userRepository
+                .getOrderedFavorites(userDetails.getUsername(),
                         limit,
-                        currentIndex * limit
-                );
+                        limit * currentIndex);
 
-        // TODO: inject search service to fetch favorites detail based on the attribute uuid
         return FavoriteUpdateResponse
                 .builder()
-//                .favorites(favorites)
+                .favorites(favorites)
                 .currentIndex(currentIndex)
                 .limit(limit)
                 .build();
@@ -91,17 +89,16 @@ public class UserServiceImpl implements UserService {
             // ignore duplicate add exception
         }
 
-        List<String> favorites = userRepository
+        List<Map<String, ?>> favorites = userRepository
                 .getOrderedFavorites(
                         user.getEmail(),
                         request.getLimit(),
                         request.getCurrentIndex() * request.getLimit()
                 );
 
-        // TODO: inject search service to fetch favorites detail based on the attribute uuid
         return FavoriteUpdateResponse
                 .builder()
-//                .favorites(favorites)
+                .favorites(favorites)
                 .currentIndex(request.getCurrentIndex())
                 .limit(request.getLimit())
                 .build();

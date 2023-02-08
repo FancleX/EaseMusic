@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
 
 import java.util.HashSet;
 import java.util.List;
@@ -58,9 +57,6 @@ public class MetaCacheUpdater extends AbstractSearchHandlerChain implements Cach
     @Override
     @Transactional
     public void saveInstances(String topic, List<?> mediaList) {
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-
         List<String> uuids = mediaList
                 .stream()
                 .map((media) -> {
@@ -107,9 +103,5 @@ public class MetaCacheUpdater extends AbstractSearchHandlerChain implements Cach
                 .toList();
 
         mediaRepository.saveAll(instancesToBeInserted);
-
-        stopWatch.stop();
-
-        log.info("execute time: " + stopWatch.getLastTaskTimeMillis());
     }
 }
