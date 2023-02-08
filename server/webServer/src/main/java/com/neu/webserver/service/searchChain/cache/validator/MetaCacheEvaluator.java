@@ -1,5 +1,6 @@
 package com.neu.webserver.service.searchChain.cache.validator;
 
+import com.neu.webserver.entity.media.Media;
 import com.neu.webserver.protocol.media.MediaPreview;
 import com.neu.webserver.repository.media.MediaRepository;
 import com.neu.webserver.service.searchChain.AbstractSearchHandlerChain;
@@ -29,23 +30,24 @@ public class MetaCacheEvaluator extends AbstractSearchHandlerChain implements Ca
     @Override
     public void handle(ChainPackage chainPackage) {
         if (!canHandle(chainPackage)) {
-            if (hasNext()) {
-                super.next.handle(chainPackage);
-                return;
-            }
+            super.next.handle(chainPackage);
+            return;
         }
 
         final String queryString = chainPackage.getQueryString();
         int entryAmount = getEntryAmount(queryString);
 
+        // don't have enough amount of query results
         if (entryAmount < leastLimit) {
             chainPackage.setNextStage(ChainPackage.Status.SEARCH);
             super.next.handle(chainPackage);
             return;
         }
 
-        List<MediaPreview> entries = getFirstPageEntries(queryString);
-        chainPackage.getQueryResult().addAll(entries);
+        // has enough amount of query results
+        List<MediaPreview> entries = getEntriesByPage(queryString, chainPackage.getOffset());
+
+        chainPackage.setQueryResult(entries);
         chainPackage.setNextStage(ChainPackage.Status.COMPLETED);
         super.next.handle(chainPackage);
     }
@@ -55,9 +57,10 @@ public class MetaCacheEvaluator extends AbstractSearchHandlerChain implements Ca
         return mediaRepository.getEntryAmount(queryString);
     }
 
-
     @Override
-    public List<MediaPreview> getFirstPageEntries(@NonNull String queryString) {
-        return mediaRepository.getMediaPreviewByPage(queryString, entriesPerPage, 0);
+    public List<MediaPreview> getEntriesByPage(@NonNull String queryString, int offset) {
+        List<Media> mediaList = mediaRepository.getMediaPreviewByPage(queryString, entriesPerPage, offset);
+        return mediaList.stream().map(media -> media.extractFromMedia(Media::mediaPreviewExtractor)).toList();
     }
+
 }

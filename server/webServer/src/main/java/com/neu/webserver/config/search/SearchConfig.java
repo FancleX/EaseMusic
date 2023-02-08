@@ -7,15 +7,15 @@ import com.neu.webserver.service.searchChain.SearchChainBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import org.springframework.context.annotation.Scope;
 
 @Configuration
 @RequiredArgsConstructor
 public class SearchConfig {
 
-    private final AbstractSearchHandlerChain youTubeSearchFetcher;
-    private final AbstractSearchHandlerChain metaCacheValidator;
+    private final AbstractSearchHandlerChain metaCacheEvaluator;
     private final AbstractSearchHandlerChain metaCacheUpdater;
+    private final AbstractSearchHandlerChain youTubeSearchFetcher;
 
     @Bean
     public AbstractSearchHandlerChain endChainHandler() {
@@ -23,14 +23,19 @@ public class SearchConfig {
     }
 
     @Bean
-    public SearchManager searchManager() {
-        final AbstractSearchHandlerChain chain = new SearchChainBuilder()
-                .next(metaCacheValidator)
+    @Scope(value = "prototype")
+    public AbstractSearchHandlerChain chain() {
+        return new SearchChainBuilder()
+                .next(metaCacheEvaluator)
                 .next(youTubeSearchFetcher)
                 .next(metaCacheUpdater)
                 .next(endChainHandler())
                 .build();
+    }
 
-        return new SearchManager(chain);
+    @Bean
+    @Scope(value = "prototype")
+    public SearchManager searchManager() {
+        return new SearchManager(chain());
     }
 }

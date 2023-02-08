@@ -27,23 +27,22 @@ public class YouTubeSearchFetcher extends AbstractSearchHandlerChain implements 
     @Override
     protected boolean canHandle(@NonNull ChainPackage chainPackage) {
         return chainPackage.getQueryString() != null
-                && !chainPackage.getQueryString().isBlank();
+                && !chainPackage.getQueryString().isBlank()
+                && ChainPackage.Status.SEARCH.equals(chainPackage.getNextStage());
     }
 
     @Override
     public void handle(ChainPackage chainPackage) {
         if (!canHandle(chainPackage)) {
-            if (hasNext()) {
-                super.next.handle(chainPackage);
-                return;
-            }
+            super.next.handle(chainPackage);
+            return;
         }
 
         List<MediaPreview> queryResults = doQuery(chainPackage.getQueryString());
         chainPackage.setQueryResult(queryResults);
+        chainPackage.setNextStage(ChainPackage.Status.CACHE_UPDATE);
 
-        if (hasNext())
-            super.next.handle(chainPackage);
+        super.next.handle(chainPackage);
     }
 
     @Override
@@ -86,6 +85,7 @@ public class YouTubeSearchFetcher extends AbstractSearchHandlerChain implements 
                                 .build();
                     }))
                     .collect(Collectors.toList());
+
         } catch (IOException e) {
             throw new UnableConnectYouTubeServiceException("Unable to send request to YouTube API");
         }

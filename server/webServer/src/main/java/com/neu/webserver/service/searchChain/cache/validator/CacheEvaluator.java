@@ -9,5 +9,5 @@ public interface CacheEvaluator {
 
     int getEntryAmount(@NonNull String queryString);
 
-    List<MediaPreview> getFirstPageEntries(@NonNull String queryString);
+    List<MediaPreview> getEntriesByPage(@NonNull String queryString, int offset);
 }

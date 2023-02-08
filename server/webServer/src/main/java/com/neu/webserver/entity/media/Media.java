@@ -1,11 +1,13 @@
 package com.neu.webserver.entity.media;
 
+import com.neu.webserver.protocol.media.MediaPreview;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 @Getter
 @Setter
@@ -43,5 +45,20 @@ public class Media {
     @Override
     public int hashCode() {
         return Objects.hashCode(uuid);
+    }
+
+    public <T> T extractFromMedia(Function<Media, T> extractor) {
+        return extractor.apply(this);
+    }
+
+    public MediaPreview mediaPreviewExtractor() {
+        return MediaPreview
+                .builder()
+                .uuid(uuid)
+                .title(title)
+                .author(author)
+                .thumbnail(thumbnail)
+                .description(description)
+                .build();
     }
 }

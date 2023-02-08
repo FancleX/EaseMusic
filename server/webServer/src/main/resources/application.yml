@@ -21,3 +21,11 @@ server:
 security:
   signInKey: 4226452948404D635166546A576E5A7234753778214125432A462D4A614E6452
   tokenDuration: 86400000
+
+search:
+  search-on-entries-below: 50
+  entries-per-page: 30
+
+YouTube:
+  applicationName: Ease Music
+  apiKey: AIzaSyDl3g3yp2zSvXNxuDW0X_XovUdikNO4ljw

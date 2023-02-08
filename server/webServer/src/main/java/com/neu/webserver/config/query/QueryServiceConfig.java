@@ -34,7 +34,7 @@ public class QueryServiceConfig {
                 .build();
     }
 
-    @Bean
+    @Bean(name = "youTubeSearchFetcher")
     public YouTubeSearchFetcher youTubeSearchFetcher() {
         return new YouTubeSearchFetcher(getService());
     }

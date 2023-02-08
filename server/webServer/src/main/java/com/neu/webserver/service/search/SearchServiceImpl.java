@@ -12,11 +12,8 @@ public class SearchServiceImpl implements SearchService {
     private final SearchManager searchManager;
 
     @Override
-    public List<MediaPreview> searchRawQuery(String query) {
-
-        List<?> results = searchManager.doSearch(query);
-        System.out.println(results);
-        return null;
+    public List<MediaPreview> searchRawQuery(String query, int pageIndex) {
+        return searchManager.doSearch(query, pageIndex);
     }
 
     @Override

@@ -88,7 +88,11 @@
 			<artifactId>google-api-client-json</artifactId>
 			<version>1.2.3-alpha</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

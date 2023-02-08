@@ -1,9 +1,8 @@
 package com.neu.webserver.config.cache;
 
 import com.neu.webserver.repository.media.MediaRepository;
-import com.neu.webserver.service.searchChain.cache.updater.CacheUpdater;
+import com.neu.webserver.service.searchChain.AbstractSearchHandlerChain;
 import com.neu.webserver.service.searchChain.cache.updater.MetaCacheUpdater;
-import com.neu.webserver.service.searchChain.cache.validator.CacheEvaluator;
 import com.neu.webserver.service.searchChain.cache.validator.MetaCacheEvaluator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -15,14 +14,13 @@ public class CacheManagerConfig {
 
     private final MediaRepository mediaRepository;
 
-    @Bean
-    public CacheUpdater metaCacheUpdater() {
-        return new MetaCacheUpdater();
+    @Bean(name = "metaCacheUpdater")
+    public AbstractSearchHandlerChain metaCacheUpdater() {
+        return new MetaCacheUpdater(mediaRepository);
     }
 
-
-    @Bean
-    public CacheEvaluator metaCacheEvaluator() {
+    @Bean(name = "metaCacheEvaluator")
+    public AbstractSearchHandlerChain metaCacheEvaluator() {
         return new MetaCacheEvaluator(mediaRepository);
     }
 }

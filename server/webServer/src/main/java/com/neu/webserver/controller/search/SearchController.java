@@ -4,7 +4,10 @@ import com.neu.webserver.protocol.media.MediaPreview;
 import com.neu.webserver.service.search.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -17,8 +20,8 @@ public class SearchController {
 
     // search raw user input
     @GetMapping("/results")
-    public ResponseEntity<List<MediaPreview>> searchRawQuery(@RequestParam("search_query") String query) {
-        return ResponseEntity.ok(searchService.searchRawQuery(query));
+    public ResponseEntity<List<MediaPreview>> searchRawQuery(@RequestParam("search_query") String query, @RequestParam("page_index") int pageIndex) {
+        return ResponseEntity.ok(searchService.searchRawQuery(query, pageIndex));
     }
 
     // internal search a set of uuids

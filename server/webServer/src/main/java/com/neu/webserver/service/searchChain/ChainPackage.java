@@ -18,6 +18,8 @@ public class ChainPackage {
 
     private String queryString;
     private Status nextStage;
+    private int offset;
+
     public enum Status {
         CACHE_EVALUATE,
         SEARCH,

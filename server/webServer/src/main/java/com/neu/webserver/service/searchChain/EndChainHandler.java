@@ -6,7 +6,7 @@ import lombok.NonNull;
 public class EndChainHandler extends AbstractSearchHandlerChain {
     @Override
     protected boolean canHandle(@NonNull ChainPackage chainPackage) {
-        return true;
+        return !hasNext();
     }
 
     @Override

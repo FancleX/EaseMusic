@@ -9,10 +9,11 @@ public interface SearchService {
     /**
      * TODO: Take user query string to search a list of media meta.
      *
-     * @param query raw query string
+     * @param query     raw query string
+     * @param pageIndex the page index
      * @return a list of media meta results
      */
-    List<MediaPreview> searchRawQuery(String query);
+    List<MediaPreview> searchRawQuery(String query, int pageIndex);
 
     /**
      * TODO: Search for the specific audio source by given the uuid.

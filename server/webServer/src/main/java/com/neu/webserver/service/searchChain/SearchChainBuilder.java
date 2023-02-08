@@ -22,10 +22,14 @@ public class SearchChainBuilder {
 
         final AbstractSearchHandlerChain head = chainNodeList.poll();
 
-        while (!chainNodeList.isEmpty()) {
-            head.setNext(chainNodeList.poll());
-        }
+        AbstractSearchHandlerChain current = head;
 
+        while (!chainNodeList.isEmpty()) {
+            AbstractSearchHandlerChain node = chainNodeList.poll();
+            current.setNext(node);
+            current = current.next;
+        }
+        
         return head;
     }
 
