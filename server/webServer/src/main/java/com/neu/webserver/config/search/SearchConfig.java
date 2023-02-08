@@ -7,7 +7,6 @@ import com.neu.webserver.service.searchChain.SearchChainBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 @Configuration
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public class SearchConfig {
     }
 
     @Bean
-    @Scope(value = "prototype")
+//    @Scope(value = "prototype")
     public AbstractSearchHandlerChain chain() {
         return new SearchChainBuilder()
                 .next(metaCacheEvaluator)
@@ -34,7 +33,7 @@ public class SearchConfig {
     }
 
     @Bean
-    @Scope(value = "prototype")
+//    @Scope(value = "prototype")
     public SearchManager searchManager() {
         return new SearchManager(chain());
     }

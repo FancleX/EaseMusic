@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -33,7 +34,8 @@ public interface MediaRepository extends JpaRepository<Media, Long> {
                 WHERE related_topics LIKE CONCAT('%', :queryString, '%')
                 LIMIT :limit OFFSET :offset
             """, nativeQuery = true)
-    List<Object> getMediaPreviewByPage(@Param("queryString") String queryString,
-                                       @Param("limit") int limit,
-                                       @Param("offset") int offset);
+    List<Map<String, ?>> getMediaPreviewByPage(@Param("queryString") String queryString,
+                                               @Param("limit") int limit,
+                                               @Param("offset") int offset);
+
 }

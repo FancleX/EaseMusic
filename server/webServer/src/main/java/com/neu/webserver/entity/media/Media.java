@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Set;
 
@@ -15,26 +14,21 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "media")
+@Table(name = "media", indexes = @Index(columnList = "uuid", unique = true))
 public class Media {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Nullable
     private Long id;
-    @Column(unique = true)
     private String uuid;
     private String title;
     @Column(columnDefinition = "text")
     private String description;
     private String thumbnail;
     private String author;
-    @Nullable
     private String audioPath;
-    @Nullable
     private String hashCode;
-    @ElementCollection(targetClass = String.class)
-    @Nullable
+    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
     private Set<String> relatedTopics;
 
     @Override

@@ -57,7 +57,7 @@ public class MetaCacheEvaluator extends AbstractSearchHandlerChain implements Ca
 
     @Override
     public List<?> getEntriesByPage(@NonNull String queryString, int offset) {
-        return mediaRepository.getMediaPreviewByPage(queryString, entriesPerPage, offset);
+        return mediaRepository.getMediaPreviewByPage(queryString, entriesPerPage, offset * entriesPerPage);
     }
 
 }
