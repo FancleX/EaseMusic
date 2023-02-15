@@ -1,0 +1,22 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package com.webserver;
+
+service DownloadService {
+  rpc download(DownloadRequest) returns (FileStreamResponse);
+  rpc readFrom(ReadFileRequest) returns (FileStreamResponse);
+}
+
+message DownloadRequest {
+  string uuid = 1;
+}
+
+message ReadFileRequest {
+  string filePath = 1;
+}
+
+message FileStreamResponse {
+  bytes file = 1;
+  string filePath = 2;
+  string hashCode = 3;
+}
