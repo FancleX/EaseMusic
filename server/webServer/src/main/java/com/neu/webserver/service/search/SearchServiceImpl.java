@@ -56,7 +56,13 @@ public class SearchServiceImpl implements SearchService {
             throw new InvalidDownloadRequestParameterException(e.getMessage());
         }
 
-        return outputStream -> downloadManager.submitReadTask(uuid, audioPath, start, end, outputStream);
+        return outputStream -> {
+            try {
+                downloadManager.submitReadTask(uuid, audioPath, start, end, outputStream);
+            } catch (InterruptedException e) {
+                throw new DownloadInterruptException();
+            }
+        };
     }
 
 

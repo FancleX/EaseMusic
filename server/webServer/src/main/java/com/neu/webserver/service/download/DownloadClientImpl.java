@@ -29,7 +29,7 @@ public class DownloadClientImpl implements DownloadClient {
     private DownloadServiceGrpc.DownloadServiceStub gRPCAsyncClient;
 
     @Override
-    public void download(String uuid, OutputStream outputStream) throws NoSuchAlgorithmException {
+    public void download(String uuid, OutputStream outputStream) throws NoSuchAlgorithmException, InterruptedException {
         DownloadRequest downloadRequest = DownloadRequest
                 .newBuilder()
                 .setUuid(uuid)
@@ -72,6 +72,8 @@ public class DownloadClientImpl implements DownloadClient {
                 countDownLatch.countDown();
             }
         });
+
+        countDownLatch.await();
     }
 
     @Transactional
@@ -112,7 +114,7 @@ public class DownloadClientImpl implements DownloadClient {
     }
 
     @Override
-    public void read(String uuid, String path, long start, long end, OutputStream outputStream) {
+    public void read(String uuid, String path, long start, long end, OutputStream outputStream) throws InterruptedException {
         final ReadFileRequest readFileRequest = ReadFileRequest
                 .newBuilder()
                 .setFilePath(path)
@@ -146,6 +148,8 @@ public class DownloadClientImpl implements DownloadClient {
                 countDownLatch.countDown();
             }
         });
+
+        countDownLatch.await();
     }
 
     @NoArgsConstructor

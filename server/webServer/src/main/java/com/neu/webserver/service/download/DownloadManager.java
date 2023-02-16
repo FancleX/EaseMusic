@@ -46,7 +46,7 @@ public class DownloadManager {
     }
 
 
-    public void submitReadTask(String uuid, String path, long start, long end, OutputStream outputStream) {
+    public void submitReadTask(String uuid, String path, long start, long end, OutputStream outputStream) throws InterruptedException {
         downloadClient.read(uuid, path, start, end, outputStream);
     }
 
