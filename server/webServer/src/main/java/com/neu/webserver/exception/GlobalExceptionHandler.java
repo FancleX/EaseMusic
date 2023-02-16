@@ -2,10 +2,11 @@ package com.neu.webserver.exception;
 
 import com.neu.webserver.exception.auth.AlreadyExistsException;
 import com.neu.webserver.exception.auth.MissingRegistryInformationException;
-import com.neu.webserver.exception.search.NoHandlerHandlesChainPackageException;
-import com.neu.webserver.exception.search.UnableConnectYouTubeServiceException;
+import com.neu.webserver.exception.search.*;
 import com.neu.webserver.exception.user.IncorrectPasswordException;
 import com.neu.webserver.protocol.exception.ErrorMessage;
+import com.neu.webserver.repository.media.MediaRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
@@ -18,12 +19,16 @@ import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 @Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final MediaRepository mediaRepository;
 
     @ExceptionHandler(value = {
             AlreadyExistsException.class,
             MissingRegistryInformationException.class,
-            IncorrectPasswordException.class
+            IncorrectPasswordException.class,
+            InvalidDownloadRequestParameterException.class
     })
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public ErrorMessage badRequestException(Exception e) {
@@ -43,9 +48,24 @@ public class GlobalExceptionHandler {
         return new ErrorMessage(e.getMessage());
     }
 
-    @ExceptionHandler(value = {NoHandlerHandlesChainPackageException.class, UnableConnectYouTubeServiceException.class})
+    @ExceptionHandler(value = {
+            NoHandlerHandlesChainPackageException.class,
+            UnableConnectYouTubeServiceException.class,
+            UnableStartDownloadingException.class
+    })
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Server internal error")
     public void internalErrorException(Exception e) {
         log.error(Arrays.toString(e.getStackTrace()));
     }
+
+
+    @ExceptionHandler(value = {
+            DownloadInterruptException.class,
+            DownloadTimeoutException.class
+    })
+    @ResponseStatus(code = HttpStatus.REQUEST_TIMEOUT, reason = "Unable to process download")
+    public void timeoutRequestException(Exception e) {
+        log.error(e.getMessage());
+    }
+
 }

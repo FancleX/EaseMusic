@@ -28,6 +28,7 @@ public class Media {
     private String author;
     private String audioPath;
     private String hashCode;
+    private long size;
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
     private Set<String> relatedTopics;
 

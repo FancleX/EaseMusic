@@ -2,11 +2,12 @@ package com.neu.webserver.controller.search;
 
 import com.neu.webserver.service.search.SearchService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.util.List;
 
@@ -26,7 +27,14 @@ public class SearchController {
     // search a specific uuid
     // byte stream of the audio file
     @GetMapping("/detail")
-    public ResponseEntity<byte[]> searchDetail(@RequestParam("uuid") String uuid) {
-        return ResponseEntity.ok(searchService.searchDetail(uuid));
+    public ResponseEntity<StreamingResponseBody> searchDetail(@RequestHeader(HttpHeaders.ACCEPT_RANGES) String range, @RequestParam("uuid") String uuid) {
+
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.builder("attachment").filename(uuid + ".mp3").build().toString())
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache")
+                .body(searchService.searchDetail(range, uuid));
     }
 }

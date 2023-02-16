@@ -46,7 +46,10 @@ public class MetaCacheUpdater extends AbstractSearchHandlerChain implements Cach
         List<?> queryResult = chainPackage.getQueryResult();
 
         saveInstances(chainPackage.getQueryString(), queryResult);
-        List<?> result = mediaRepository.getMediaPreviewByPage(chainPackage.getQueryString(), entriesPerPage, chainPackage.getOffset() * entriesPerPage);
+        List<?> result = mediaRepository
+                .getMediaPreviewByPage(chainPackage.getQueryString(),
+                        entriesPerPage,
+                        chainPackage.getOffset() * entriesPerPage);
 
         chainPackage.setQueryResult(result);
         chainPackage.setNextStage(ChainPackage.Status.COMPLETED);
@@ -76,7 +79,9 @@ public class MetaCacheUpdater extends AbstractSearchHandlerChain implements Cach
         List<Media> existingEntities = query.getResultList();
         existingEntities.forEach(e -> e.getRelatedTopics().add(topic));
 
-        Map<String, Media> existingEntityMap = existingEntities.stream().collect(Collectors.toMap(Media::getUuid, Function.identity()));
+        Map<String, Media> existingEntityMap = existingEntities
+                .stream()
+                .collect(Collectors.toMap(Media::getUuid, Function.identity()));
 
         List<Media> instancesToBeInserted = mediaList
                 .stream()

@@ -29,3 +29,9 @@ search:
 YouTube:
   applicationName: Ease Music
   apiKey: AIzaSyDl3g3yp2zSvXNxuDW0X_XovUdikNO4ljw
+
+grpc:
+  client:
+    grpc-download-service:
+      address: static://localhost:9001
+      negotiation-type: plaintext
