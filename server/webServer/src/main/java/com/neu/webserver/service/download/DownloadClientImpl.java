@@ -97,7 +97,7 @@ public class DownloadClientImpl implements DownloadClient {
 
                             log.info("Add a copy of the duplicated file: " + uuid + ", size: " + size);
 
-                            final DeleteResourceRequest deleteResourceRequest = DeleteResourceRequest.newBuilder().setUuid(uuid).build();
+                            final DeleteResourceRequest deleteResourceRequest = DeleteResourceRequest.newBuilder().setFilePath(audioPath).build();
                             executorService.submit(() -> gRPCAsyncClient.delete(deleteResourceRequest, null));
                         }),
                         () -> {

@@ -30,7 +30,7 @@ message ReadFileResponse {
 }
 
 message DeleteResourceRequest {
-  string uuid = 1;
+  string filePath = 1;
 }
 
 message DeleteResourceResponse {}
