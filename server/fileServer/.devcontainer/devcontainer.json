@@ -9,14 +9,17 @@
 		"ghcr.io/devcontainers-contrib/features/yapf:1": {}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	"forwardPorts": [
+		"9001:9001"
+	],
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "pip3 install --user -r requirements.txt",
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"ms-python.python"
+				"ms-python.python",
+				"zxh404.vscode-proto3"
 			],
 			"settings": {
 				"editor.formatOnSave": true
