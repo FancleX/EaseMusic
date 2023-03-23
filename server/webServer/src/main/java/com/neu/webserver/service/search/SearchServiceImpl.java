@@ -1,7 +1,7 @@
 package com.neu.webserver.service.search;
 
 import com.neu.webserver.entity.media.Media;
-import com.neu.webserver.exception.search.DownloadInterruptException;
+import com.neu.webserver.exception.search.DownloadInterruptedException;
 import com.neu.webserver.exception.search.InvalidDownloadRequestParameterException;
 import com.neu.webserver.protocol.search.response.SearchFileResponse;
 import com.neu.webserver.repository.media.MediaRepository;
@@ -40,7 +40,7 @@ public class SearchServiceImpl implements SearchService {
 
                 return new SearchFileResponse(resultBuilder.toString());
             } catch (InterruptedException e) {
-                throw new DownloadInterruptException();
+                throw new DownloadInterruptedException();
             }
         }
 
@@ -59,7 +59,7 @@ public class SearchServiceImpl implements SearchService {
 
             return new SearchFileResponse(resultBuilder.toString());
         } catch (InterruptedException e) {
-            throw new DownloadInterruptException();
+            throw new DownloadInterruptedException();
         }
     }
 }

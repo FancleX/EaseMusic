@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(value = {
-            DownloadInterruptException.class,
+            DownloadInterruptedException.class,
             DownloadTimeoutException.class
     })
     @ResponseStatus(code = HttpStatus.REQUEST_TIMEOUT, reason = "Unable to process download")
