@@ -30,8 +30,11 @@ public class SecurityFilterConfig {
                 .csrf().disable()
                 // set permission endpoints and session
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/api/v1/search/results").permitAll()
+                .antMatchers("/api/v1/auth/**").permitAll()
+//                .requestMatchers("/api/v1/auth/**").permitAll()
+//                .requestMatchers("/api/v1/search/results").permitAll()
+//                .requestMatchers("/api/v1/search/**").permitAll()
+                .antMatchers("/api/v1/search/**").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -50,9 +53,10 @@ public class SecurityFilterConfig {
                 new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("*");
+//        config.addAllowedOrigin("*");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
+        config.addAllowedOriginPattern("*");
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }

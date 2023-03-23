@@ -9,17 +9,20 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class DownloadClientImpl implements DownloadClient {
 
@@ -29,7 +32,7 @@ public class DownloadClientImpl implements DownloadClient {
     private DownloadServiceGrpc.DownloadServiceStub gRPCAsyncClient;
 
     @Override
-    public void download(String uuid, OutputStream outputStream) throws NoSuchAlgorithmException, InterruptedException {
+    public void download(String uuid, StringBuilder resultBuilder) throws NoSuchAlgorithmException, InterruptedException {
         DownloadRequest downloadRequest = DownloadRequest
                 .newBuilder()
                 .setUuid(uuid)
@@ -38,37 +41,35 @@ public class DownloadClientImpl implements DownloadClient {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final FileDescription file = new FileDescription();
         final MessageDigest md = MessageDigest.getInstance("SHA-256");
+        final ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 
         log.info("Start downloading file: " + uuid);
         gRPCAsyncClient.download(downloadRequest, new StreamObserver<>() {
             @Override
             public void onNext(DownloadResponse value) {
-                file.filePath = value.getFilePath();
+                if (file.filePath == null)
+                    file.filePath = value.getFilePath();
 
-                try (outputStream) {
-                    // calculate hash and file size
-                    byte[] bytes = value.getFile().toByteArray();
-                    md.update(bytes);
-                    file.size += bytes.length;
+                // calculate hash and file size
+                byte[] bytes = value.getFile().toByteArray();
+                md.update(bytes);
+                file.size += bytes.length;
 
-                    // stream to response
-                    outputStream.write(bytes);
-                    outputStream.flush();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                byteBuffer.writeBytes(bytes);
             }
 
             @Override
             public void onError(Throwable t) {
                 log.error("Error on downloading file: " + uuid + ", reason: " + t.getMessage());
-                onSaveDownloadEvent(uuid, md, file);
                 countDownLatch.countDown();
             }
 
             @Override
             public void onCompleted() {
                 onSaveDownloadEvent(uuid, md, file);
+
+                String base64String = Base64.getEncoder().encodeToString(byteBuffer.toByteArray());
+                resultBuilder.append(base64String);
                 countDownLatch.countDown();
             }
         });
@@ -79,7 +80,13 @@ public class DownloadClientImpl implements DownloadClient {
     @Transactional
     protected void onSaveDownloadEvent(String uuid, MessageDigest md, FileDescription file) {
         // look up for a file with the same hash
-        final String hash = new String(md.digest());
+        final byte[] digest = md.digest();
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest)
+            sb.append(String.format("%02x", b));
+
+        final String hash = sb.toString();
+
         final Media media = mediaRepository.findByUuid(uuid);
 
         mediaRepository
@@ -114,7 +121,7 @@ public class DownloadClientImpl implements DownloadClient {
     }
 
     @Override
-    public void read(String uuid, String path, long start, long end, OutputStream outputStream) throws InterruptedException {
+    public void read(String uuid, String path, long start, long end, StringBuilder resultBuilder) throws InterruptedException {
         final ReadFileRequest readFileRequest = ReadFileRequest
                 .newBuilder()
                 .setFilePath(path)
@@ -123,17 +130,13 @@ public class DownloadClientImpl implements DownloadClient {
                 .build();
 
         final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final ByteBuffer byteBuffer = ByteBuffer.allocate((int) (end - start + 1));
 
         log.info("Start reading file: " + uuid);
         gRPCAsyncClient.read(readFileRequest, new StreamObserver<>() {
             @Override
             public void onNext(ReadFileResponse value) {
-                try (outputStream) {
-                    outputStream.write(value.getFile().toByteArray());
-                    outputStream.flush();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                byteBuffer.put(value.getFile().asReadOnlyByteBuffer());
             }
 
             @Override
@@ -144,7 +147,9 @@ public class DownloadClientImpl implements DownloadClient {
 
             @Override
             public void onCompleted() {
-                log.info("Successfully read file: " + uuid);
+                log.info("Successfully read file: " + uuid + " from " + start + " to " + end);
+                String base64String = Base64.getEncoder().encodeToString(byteBuffer.array());
+                resultBuilder.append(base64String);
                 countDownLatch.countDown();
             }
         });

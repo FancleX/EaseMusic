@@ -1,9 +1,9 @@
 package com.neu.webserver.entity.media;
 
-import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
 
+import javax.persistence.*;
 import java.util.Objects;
 import java.util.Set;
 

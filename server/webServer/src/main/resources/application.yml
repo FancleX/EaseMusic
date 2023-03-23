@@ -6,7 +6,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -33,5 +33,5 @@ YouTube:
 grpc:
   client:
     grpc-download-service:
-      address: static://localhost:9001
+      address: 'static://localhost:9001'
       negotiation-type: plaintext

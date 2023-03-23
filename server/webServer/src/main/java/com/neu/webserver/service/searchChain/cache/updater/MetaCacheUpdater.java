@@ -5,14 +5,14 @@ import com.neu.webserver.protocol.media.MediaPreview;
 import com.neu.webserver.repository.media.MediaRepository;
 import com.neu.webserver.service.searchChain.AbstractSearchHandlerChain;
 import com.neu.webserver.service.searchChain.ChainPackage;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;

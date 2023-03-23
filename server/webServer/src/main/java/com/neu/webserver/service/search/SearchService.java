@@ -1,6 +1,6 @@
 package com.neu.webserver.service.search;
 
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import com.neu.webserver.protocol.search.response.SearchFileResponse;
 
 import java.util.List;
 
@@ -23,6 +23,6 @@ public interface SearchService {
      * @param uuid  the uuid of the source
      * @return the stream of audio file
      */
-    StreamingResponseBody searchDetail(String range, String uuid);
+    SearchFileResponse searchDetail(String range, String uuid);
 
 }

@@ -3,17 +3,15 @@
 {
 	"name": "file-server",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "python:3.11",
+	"image": "python:3.8",
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
 		"ghcr.io/devcontainers-contrib/features/yapf:1": {}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [
-		"9001:9001"
-	],
+	"forwardPorts": [],
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pip3 install --user -r requirements.txt",
+	"postCreateCommand": "apt update; apt install -y ffmpeg; pip3 install --user -r requirements.txt",
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
