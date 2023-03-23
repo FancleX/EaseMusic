@@ -20,9 +20,7 @@ public class DownloadManager {
     private final DownloadClient downloadClient;
 
     public void submitDownloadTask(String uuid, StringBuilder resultBuilder) throws InterruptedException, DownloadTimeoutException {
-        Lock lock = taskPool.putIfAbsent(uuid, new ReentrantLock());
-        if (lock == null)
-            lock = taskPool.get(uuid);
+        Lock lock = taskPool.computeIfAbsent(uuid, key -> new ReentrantLock());
 
         if (lock.tryLock(30, TimeUnit.SECONDS)) {
             try {

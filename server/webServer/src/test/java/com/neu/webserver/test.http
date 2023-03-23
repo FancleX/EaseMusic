@@ -1,9 +1,9 @@
 ## concurrent download request test
-GET http://localhost:9000/api/v1/search/detail?uuid=z2RdkjYarVY
+GET http://localhost:9000/api/v1/search/detail?uuid=rdyuzEiiLEY
 --headers
 Accept-Ranges: 0-
 
 ###
-GET http://localhost:9000/api/v1/search/detail?uuid=z2RdkjYarVY
+GET http://localhost:9000/api/v1/search/detail?uuid=rdyuzEiiLEY
 --headers
 Accept-Ranges: 0-
