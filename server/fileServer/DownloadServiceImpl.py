@@ -67,3 +67,5 @@ class Service(DownloadService_pb2_grpc.DownloadServiceServicer):
 
         if os.path.isfile(path):
             os.remove(path)
+        
+        return DownloadService_pb2.DeleteResourceResponse()

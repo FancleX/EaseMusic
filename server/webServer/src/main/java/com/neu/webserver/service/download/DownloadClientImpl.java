@@ -10,16 +10,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.transaction.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
@@ -27,9 +25,12 @@ import java.util.concurrent.Executors;
 public class DownloadClientImpl implements DownloadClient {
 
     private final MediaRepository mediaRepository;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
+    //    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
     @GrpcClient("grpc-download-service")
     private DownloadServiceGrpc.DownloadServiceStub gRPCAsyncClient;
+
+    @GrpcClient("grpc-download-service")
+    private DownloadServiceGrpc.DownloadServiceBlockingStub gRPCBlockingClient;
 
     @Override
     public void download(String uuid, StringBuilder resultBuilder) throws NoSuchAlgorithmException, InterruptedException {
@@ -50,9 +51,8 @@ public class DownloadClientImpl implements DownloadClient {
                 if (file.filePath == null)
                     file.filePath = value.getFilePath();
 
-                // calculate hash and file size
+                // calculate file size
                 byte[] bytes = value.getFile().toByteArray();
-                md.update(bytes);
                 file.size += bytes.length;
 
                 byteBuffer.writeBytes(bytes);
@@ -66,9 +66,13 @@ public class DownloadClientImpl implements DownloadClient {
 
             @Override
             public void onCompleted() {
-                onSaveDownloadEvent(uuid, md, file);
-
-                String base64String = Base64.getEncoder().encodeToString(byteBuffer.toByteArray());
+                byte[] fileBytes = byteBuffer.toByteArray();
+                // hash
+                final byte[] digest = md.digest(fileBytes);
+                // save to database
+                onSaveDownloadEvent(uuid, digest, file);
+                // string encode
+                String base64String = Base64.getEncoder().encodeToString(fileBytes);
                 resultBuilder.append(base64String);
                 countDownLatch.countDown();
             }
@@ -78,46 +82,54 @@ public class DownloadClientImpl implements DownloadClient {
     }
 
     @Transactional
-    protected void onSaveDownloadEvent(String uuid, MessageDigest md, FileDescription file) {
+    protected void onSaveDownloadEvent(String uuid, final byte[] hash, FileDescription file) {
         // look up for a file with the same hash
-        final byte[] digest = md.digest();
         StringBuilder sb = new StringBuilder();
-        for (byte b : digest)
-            sb.append(String.format("%02x", b));
+        for (byte h : hash)
+            sb.append(String.format("%02x", h));
 
-        final String hash = sb.toString();
+        final String hashString = sb.toString();
 
         final Media media = mediaRepository.findByUuid(uuid);
 
-        mediaRepository
-                .findByHashCode(hash)
-                .ifPresentOrElse(
-                        (existedFile -> {
-                            String audioPath = existedFile.getAudioPath();
-                            long size = existedFile.getSize();
+        media.setAudioPath(file.filePath);
+        media.setHashCode(hashString);
+        media.setSize(file.size);
 
-                            media.setAudioPath(audioPath);
-                            media.setSize(size);
-                            media.setHashCode(hash);
+        mediaRepository.save(media);
 
-                            mediaRepository.save(media);
+        log.info("Successfully download file: " + uuid + ", size: " + file.size);
 
-                            log.info("Add a copy of the duplicated file: " + uuid + ", size: " + size);
-
-                            final DeleteResourceRequest deleteResourceRequest = DeleteResourceRequest.newBuilder().setFilePath(audioPath).build();
-                            executorService.submit(() -> gRPCAsyncClient.delete(deleteResourceRequest, null));
-                        }),
-                        () -> {
-
-                            media.setAudioPath(file.filePath);
-                            media.setHashCode(hash);
-                            media.setSize(file.size);
-
-                            mediaRepository.save(media);
-
-                            log.info("Successfully download file: " + uuid + ", size: " + file.size);
-                        }
-                );
+//        mediaRepository
+//                .findByHashCode(hashString)
+//                .ifPresentOrElse(
+//                        (existedFile -> {
+//                            String audioPath = existedFile.getAudioPath();
+//                            long size = existedFile.getSize();
+//
+//                            media.setAudioPath(audioPath);
+//                            media.setSize(size);
+//                            media.setHashCode(hashString);
+//
+//                            mediaRepository.save(media);
+//
+//                            log.info("Add a copy of the duplicated file: " + uuid + ", size: " + size);
+//
+//                            final DeleteResourceRequest deleteResourceRequest = DeleteResourceRequest.newBuilder().setFilePath(audioPath).build();
+//                            executorService.submit(() -> gRPCBlockingClient.delete(deleteResourceRequest));
+//                        }),
+//                        () -> {
+//
+//                            media.setAudioPath(file.filePath);
+//                            media.setHashCode(hashString);
+//                            media.setSize(file.size);
+//
+//                            mediaRepository.save(media);
+//
+//                            log.info("Successfully download file: " + uuid + ", size: " + file.size);
+//
+//                        }
+//                );
     }
 
     @Override
