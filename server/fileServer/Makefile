@@ -8,4 +8,4 @@ clean:
 	docker image rm file-server
 
 run:
-	docker run -v /media/data10g/file-server-app:/app/data -p 9001:9001 -it --restart=unless-stopped -d file-server
+	docker run -v /media/data10g/file-server-app:/app/audios -p 9001:9001 -it --restart=unless-stopped -d file-server
