@@ -3,6 +3,7 @@ package com.neu.webserver.service.user;
 import com.neu.webserver.entity.user.MediaShort;
 import com.neu.webserver.entity.user.User;
 import com.neu.webserver.exception.user.IncorrectPasswordException;
+import com.neu.webserver.exception.user.NoSuchFavoriteMediaException;
 import com.neu.webserver.protocol.user.request.FavoriteUpdateRequest;
 import com.neu.webserver.protocol.user.request.PasswordRequest;
 import com.neu.webserver.protocol.user.request.UsernameRequest;
@@ -33,7 +34,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UsernameResponse updateUsername(UserDetails userDetails, UsernameRequest request) {
-        return null;
+        //        System.out.println("Older Username: " + userDetails.getUsername());
+        String newUsername = request.getNewUsername();
+//        System.out.println("newUsername = " + newUsername);
+        userRepository.updateUsername(userDetails.getUsername(), newUsername);
+        return new UsernameResponse(newUsername);
     }
 
     @Override
@@ -106,6 +111,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public FavoriteUpdateResponse removeFavorite(UserDetails userDetails, FavoriteUpdateRequest request) {
-        return null;
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+
+        MediaShort media = mediaShortRepository
+                .findByUserAndUuid(user, request.getUuid())
+                .orElseThrow(() -> {throw new NoSuchFavoriteMediaException("Media not found");});
+
+        mediaShortRepository.delete(media);
+
+        List<Map<String, ?>> favorites = userRepository.getOrderedFavorites(
+                user.getEmail(),
+                request.getLimit(),
+                request.getCurrentIndex() * request.getLimit()
+        );
+
+        return FavoriteUpdateResponse.builder()
+                .favorites(favorites)
+                .currentIndex(request.getCurrentIndex())
+                .limit(request.getLimit())
+                .build();
     }
 }

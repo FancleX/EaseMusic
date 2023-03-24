@@ -4,6 +4,7 @@ import com.neu.webserver.exception.auth.AlreadyExistsException;
 import com.neu.webserver.exception.auth.MissingRegistryInformationException;
 import com.neu.webserver.exception.search.*;
 import com.neu.webserver.exception.user.IncorrectPasswordException;
+import com.neu.webserver.exception.user.NoSuchFavoriteMediaException;
 import com.neu.webserver.protocol.exception.ErrorMessage;
 import com.neu.webserver.repository.media.MediaRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,8 @@ public class GlobalExceptionHandler {
             AlreadyExistsException.class,
             MissingRegistryInformationException.class,
             IncorrectPasswordException.class,
-            InvalidDownloadRequestParameterException.class
+            InvalidDownloadRequestParameterException.class,
+            NoSuchFavoriteMediaException.class
     })
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public ErrorMessage badRequestException(Exception e) {

@@ -20,6 +20,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query(value = "UPDATE _user SET password = :password WHERE email = :email", nativeQuery = true)
     void updatePassword(@Param("email") String email, @Param("password") String password);
 
+    @Modifying
+    @Query(value = "UPDATE _user SET username = :username WHERE email = :email", nativeQuery = true)
+    void updateUsername(@Param("email") String email, @Param("username") String username);
+
     @Query(value = """
                          SELECT user_favorites.uuid, m.title, m.author, m.thumbnail, m.description
                          FROM user_favorites
