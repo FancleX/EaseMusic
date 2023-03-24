@@ -14,7 +14,7 @@ public interface UserService {
      * Update username.
      *
      * @param userDetails authenticated user
-     * @param request request to update username
+     * @param request     request to update username
      * @return response with the username
      */
     UsernameResponse updateUsername(UserDetails userDetails, UsernameRequest request);
@@ -23,7 +23,7 @@ public interface UserService {
      * Update password.
      *
      * @param userDetails authenticated user
-     * @param request request to update password
+     * @param request     request to update password
      * @return response with a new signed token
      */
     PasswordResponse updatePassword(UserDetails userDetails, PasswordRequest request);
@@ -31,9 +31,9 @@ public interface UserService {
     /**
      * Get all favorites of the user.
      *
-     * @param userDetails authenticated user
+     * @param userDetails  authenticated user
      * @param currentIndex current page index
-     * @param limit limit per page
+     * @param limit        limit per page
      * @return response with a sorted favorites list in time according order by page
      */
     FavoriteUpdateResponse getFavorites(UserDetails userDetails, int currentIndex, int limit);
@@ -42,7 +42,7 @@ public interface UserService {
      * Add a media to favorites.
      *
      * @param userDetails authenticated user
-     * @param request request to add a media to favorites
+     * @param request     request to add a media to favorites
      * @return response with a sorted favorites list in time according order
      */
     FavoriteUpdateResponse addFavorite(UserDetails userDetails, FavoriteUpdateRequest request);
@@ -51,7 +51,7 @@ public interface UserService {
      * Remove a media from favorites.
      *
      * @param userDetails authenticated user
-     * @param request request to remove a media to favorites
+     * @param request     request to remove a media to favorites
      * @return response with a sorted favorites list in time according order
      */
     FavoriteUpdateResponse removeFavorite(UserDetails userDetails, FavoriteUpdateRequest request);

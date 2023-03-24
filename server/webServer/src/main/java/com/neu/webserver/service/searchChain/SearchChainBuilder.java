@@ -29,7 +29,7 @@ public class SearchChainBuilder {
             current.setNext(node);
             current = current.next;
         }
-        
+
         return head;
     }
 

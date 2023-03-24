@@ -10,14 +10,14 @@ class Service(DownloadService_pb2_grpc.DownloadServiceServicer):
 
     def __init__(self) -> None:
         logging.basicConfig(level = logging.INFO)
-        
-    
+
+
     def download(self, request: DownloadService_pb2.DownloadRequest, context):
         video_id = request.uuid
         audio_name = f'{video_id}.mp3'
         audio_path_without_extension = f'{self.file_path_dir}/{video_id}'
         audio_path_with_extension = f'{self.file_path_dir}/{audio_name}'
-        
+
         if not os.path.isfile(audio_path_with_extension):
             logging.info(f"request to donwload: {video_id}")
 
@@ -31,11 +31,11 @@ class Service(DownloadService_pb2_grpc.DownloadServiceServicer):
                     }],
                     'outtmpl': audio_path_without_extension
                 }
-            
+
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download(self.request_url_prefix + video_id)
-        
+
         logging.info(f"finished downloading: {audio_name}, start streaming")
         with open(audio_path_with_extension, mode='rb') as audio:
             while chunk := audio.read(1024):
@@ -59,7 +59,7 @@ class Service(DownloadService_pb2_grpc.DownloadServiceServicer):
                 read_buffer = 1024 if endIndex - currentIndex > 1024 else endIndex - currentIndex
                 # logging.info(f'read bytes: {currentIndex}')
                 yield DownloadService_pb2.ReadFileResponse(file=chunk)
-                            
+
     def delete(self, request, context):
         path = request.filePath
 
@@ -67,5 +67,5 @@ class Service(DownloadService_pb2_grpc.DownloadServiceServicer):
 
         if os.path.isfile(path):
             os.remove(path)
-        
+
         return DownloadService_pb2.DeleteResourceResponse()

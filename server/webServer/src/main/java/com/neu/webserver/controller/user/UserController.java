@@ -25,7 +25,7 @@ public class UserController {
     public ResponseEntity<UsernameResponse> updateUsername(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody UsernameRequest request
-            ) {
+    ) {
         return ResponseEntity.ok(userService.updateUsername(userDetails, request));
     }
 
@@ -34,7 +34,7 @@ public class UserController {
     public ResponseEntity<PasswordResponse> updatePassword(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody PasswordRequest request
-            ) {
+    ) {
         return ResponseEntity.ok(userService.updatePassword(userDetails, request));
     }
 
@@ -45,7 +45,7 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam("index") int currentIndex,
             @RequestParam("limit") int limit
-            ) {
+    ) {
         return ResponseEntity.ok(userService.getFavorites(userDetails, currentIndex, limit));
     }
 
@@ -54,7 +54,7 @@ public class UserController {
     public ResponseEntity<FavoriteUpdateResponse> addFavorite(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody FavoriteUpdateRequest request
-            ) {
+    ) {
         return ResponseEntity.ok(userService.addFavorite(userDetails, request));
     }
 

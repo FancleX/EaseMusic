@@ -19,17 +19,17 @@ public interface JwtService {
     /**
      * Extract a claim from token.
      *
-     * @param token token
+     * @param token          token
      * @param claimsResolver claims resolver function
+     * @param <T>            the property type
      * @return the property in the claim
-     * @param <T> the property type
      */
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
 
     /**
      * Generate a token for the given user.
      *
-     * @param claims claims to be put in the token
+     * @param claims      claims to be put in the token
      * @param userDetails user details
      * @return a signed jwt token
      */
@@ -46,7 +46,7 @@ public interface JwtService {
     /**
      * Verify a token based on provided user details.
      *
-     * @param token jwt token
+     * @param token       jwt token
      * @param userDetails the user details
      * @return true if the token is valid, otherwise false
      */

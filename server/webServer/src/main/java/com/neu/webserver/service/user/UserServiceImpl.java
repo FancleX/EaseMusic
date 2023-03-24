@@ -115,7 +115,9 @@ public class UserServiceImpl implements UserService {
 
         MediaShort media = mediaShortRepository
                 .findByUserAndUuid(user, request.getUuid())
-                .orElseThrow(() -> {throw new NoSuchFavoriteMediaException("Media not found");});
+                .orElseThrow(() -> {
+                    throw new NoSuchFavoriteMediaException("Media not found");
+                });
 
         mediaShortRepository.delete(media);
 
