@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">ease-music-andriod</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ease_music">Ease Music</string>
+    <string name="immersive_music_playing_app">Immersive Music Playing App</string>
 </resources>
