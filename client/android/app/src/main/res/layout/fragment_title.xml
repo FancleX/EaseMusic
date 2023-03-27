@@ -3,25 +3,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.TitleFragment">
 
-    <ImageView
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:layout_gravity="start"
-        android:paddingTop="10dp"
-        android:layout_marginStart="10dp"
-        android:src="@drawable/logo" />
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:cardBackgroundColor="@color/primary_color"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="5dp"
+        >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:fontFamily="@font/bungee"
-        android:text="@string/ease_music"
-        android:textColor="#C91E2730"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:layout_gravity="start"
+            android:paddingTop="10dp"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/logo" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:fontFamily="@font/bungee"
+            android:text="@string/ease_music"
+            android:textColor="#C91E2730"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </com.google.android.material.card.MaterialCardView>
 
 </FrameLayout>

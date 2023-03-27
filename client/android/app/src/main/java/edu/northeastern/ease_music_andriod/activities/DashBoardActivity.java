@@ -10,6 +10,7 @@ import android.os.Bundle;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import edu.northeastern.ease_music_andriod.fragments.HomeFragment;
+import edu.northeastern.ease_music_andriod.fragments.MiniPlayerFragment;
 import edu.northeastern.ease_music_andriod.fragments.MusicFragment;
 import edu.northeastern.ease_music_andriod.R;
 import edu.northeastern.ease_music_andriod.fragments.SearchFragment;
@@ -30,6 +31,7 @@ public class DashBoardActivity extends AppCompatActivity {
 
         // register top panel
         replaceTopPanelFragment(new TitleFragment());
+//        replaceTopPanelFragment(new MiniPlayerFragment());
 
         // register bottom nav
         replaceFragment(new SearchFragment());

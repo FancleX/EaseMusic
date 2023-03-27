@@ -14,4 +14,5 @@
     <color name="secondary_color">#E6F4D6</color>
     <color name="secondary_variant_color">#C3E6A5</color>
     <color name="secondary_text_color">#000000</color>
+    <color name="main_background_color">#40D6E6F4</color>
 </resources>
