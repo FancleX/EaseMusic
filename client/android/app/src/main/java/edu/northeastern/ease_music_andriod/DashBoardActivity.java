@@ -22,8 +22,11 @@ public class DashBoardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dash_board);
 
-        replaceFragment(new SearchFragment());
+        // register top panel
+        replaceTopPanelFragment(new TitleFragment());
 
+        // register bottom nav
+        replaceFragment(new SearchFragment());
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnItemSelectedListener(item -> {
             final int id = item.getItemId();
@@ -44,6 +47,14 @@ public class DashBoardActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         fragmentTransaction.replace(R.id.frame_layout, fragment);
+        fragmentTransaction.commit();
+    }
+
+    public void replaceTopPanelFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        fragmentTransaction.replace(R.id.top_view_panel, fragment);
         fragmentTransaction.commit();
     }
 }

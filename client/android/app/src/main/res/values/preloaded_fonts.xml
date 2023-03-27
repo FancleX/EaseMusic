@@ -2,6 +2,11 @@
 <resources>
     <array name="preloaded_fonts" translatable="false">
         <item>@font/arbutus</item>
+        <item>@font/architects_daughter</item>
+        <item>@font/arizonia</item>
         <item>@font/bangers</item>
+        <item>@font/bungee</item>
+        <item>@font/dancing_script_bold</item>
+        <item>@font/dela_gothic_one</item>
     </array>
 </resources>
