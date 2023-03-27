@@ -1,4 +1,4 @@
-package edu.northeastern.ease_music_andriod;
+package edu.northeastern.ease_music_andriod.fragments;
 
 import android.os.Bundle;
 
@@ -8,12 +8,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import edu.northeastern.ease_music_andriod.R;
+
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link MiniPlayerFragment#newInstance} factory method to
+ * Use the {@link TitleFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MiniPlayerFragment extends Fragment {
+public class TitleFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -24,7 +26,7 @@ public class MiniPlayerFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    public MiniPlayerFragment() {
+    public TitleFragment() {
         // Required empty public constructor
     }
 
@@ -34,11 +36,11 @@ public class MiniPlayerFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment MiniPlayerFragment.
+     * @return A new instance of fragment TitleFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MiniPlayerFragment newInstance(String param1, String param2) {
-        MiniPlayerFragment fragment = new MiniPlayerFragment();
+    public static TitleFragment newInstance(String param1, String param2) {
+        TitleFragment fragment = new TitleFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -59,6 +61,6 @@ public class MiniPlayerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_mini_player, container, false);
+        return inflater.inflate(R.layout.fragment_title, container, false);
     }
 }

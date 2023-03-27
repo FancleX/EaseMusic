@@ -1,4 +1,4 @@
-package edu.northeastern.ease_music_andriod;
+package edu.northeastern.ease_music_andriod.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -8,6 +8,12 @@ import androidx.fragment.app.FragmentTransaction;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import edu.northeastern.ease_music_andriod.fragments.HomeFragment;
+import edu.northeastern.ease_music_andriod.fragments.MusicFragment;
+import edu.northeastern.ease_music_andriod.R;
+import edu.northeastern.ease_music_andriod.fragments.SearchFragment;
+import edu.northeastern.ease_music_andriod.fragments.TitleFragment;
 
 public class DashBoardActivity extends AppCompatActivity {
 

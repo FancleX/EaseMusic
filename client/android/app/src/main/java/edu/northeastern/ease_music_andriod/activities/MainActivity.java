@@ -1,4 +1,4 @@
-package edu.northeastern.ease_music_andriod;
+package edu.northeastern.ease_music_andriod.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -10,6 +10,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import edu.northeastern.ease_music_andriod.R;
 
 
 public class MainActivity extends AppCompatActivity {
