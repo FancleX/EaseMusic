@@ -10,6 +10,7 @@ import android.os.Bundle;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import edu.northeastern.ease_music_andriod.fragments.HomeFragment;
+import edu.northeastern.ease_music_andriod.fragments.LoginFragment;
 import edu.northeastern.ease_music_andriod.fragments.MiniPlayerFragment;
 import edu.northeastern.ease_music_andriod.fragments.MusicFragment;
 import edu.northeastern.ease_music_andriod.R;
@@ -42,8 +43,8 @@ public class DashBoardActivity extends AppCompatActivity {
                 replaceFragment(new SearchFragment());
             else if (id == R.id.music)
                 replaceFragment(new MusicFragment());
-            else if (id == R.id.home)
-                replaceFragment(new HomeFragment());
+            else if (id == R.id.login)
+                replaceFragment(new LoginFragment());
 
             return true;
         });
