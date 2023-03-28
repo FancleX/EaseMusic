@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,14 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.northeastern.ease_music_andriod.R;
+import edu.northeastern.ease_music_andriod.utils.DataCache;
 
 public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemViewHolder> implements MusicItemViewHolder.OnMusicItemClickListener {
 
-    private final ArrayList<MusicItem> musicList;
+    private ArrayList<MusicItem> musicList;
 
-    public MusicItemAdapter() {
-        this.musicList = new ArrayList<>();
-    }
+    public MusicItemAdapter() {}
 
 
     @NonNull
@@ -35,12 +36,14 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull MusicItemViewHolder holder, int position) {
+        Animation animation = AnimationUtils.loadAnimation(holder.itemView.getContext(), android.R.anim.slide_in_left);
         holder.bindData(musicList.get(position));
+        holder.itemView.startAnimation(animation);
     }
 
     @Override
     public int getItemCount() {
-        return musicList.size();
+        return musicList == null ? 0 : musicList.size();
     }
 
 
@@ -62,13 +65,8 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemViewHolder> 
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void addAllItems(ArrayList<MusicItem> list) {
-        musicList.clear();
-        musicList.addAll(list);
+    public void updateData() {
+        musicList = DataCache.getInstance().getSearchCache().getResultList();
         notifyDataSetChanged();
-    }
-
-    public ArrayList<MusicItem> getMusicList() {
-        return musicList;
     }
 }

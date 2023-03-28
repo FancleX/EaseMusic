@@ -21,6 +21,7 @@
            android:background="@drawable/search_bar"
            app:queryHint="Search a Music ..."
            app:iconifiedByDefault="false"
+           app:queryBackground="@null"
            />
 
        <androidx.recyclerview.widget.RecyclerView

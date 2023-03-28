@@ -7,11 +7,11 @@ import androidx.annotation.NonNull;
 
 public class MusicItem implements Parcelable {
 
-    private String uuid;
-    private String title;
-    private String author;
-    private String description;
-    private String thumbnail;
+    private final String uuid;
+    private final String title;
+    private final String author;
+    private final String description;
+    private final String thumbnail;
 
 
     public MusicItem(String uuid, String title, String author, String description, String thumbnail) {

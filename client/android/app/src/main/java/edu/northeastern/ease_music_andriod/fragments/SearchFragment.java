@@ -1,6 +1,8 @@
 package edu.northeastern.ease_music_andriod.fragments;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,10 +13,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.view.inputmethod.InputMethodManager;
 
 import org.json.JSONArray;
@@ -23,12 +29,15 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import edu.northeastern.ease_music_andriod.R;
 import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItem;
 import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItemAdapter;
 import edu.northeastern.ease_music_andriod.utils.APIRequestGenerator;
+import edu.northeastern.ease_music_andriod.utils.DataCache;
 import edu.northeastern.ease_music_andriod.utils.RequestAPIs;
 
 public class SearchFragment extends Fragment implements APIRequestGenerator.RequestCallback {
@@ -36,7 +45,8 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
     // ================ fields ================
     private final APIRequestGenerator requestGenerator = APIRequestGenerator.getInstance();
     private static final String TAG = "Search Fragment";
-    private static final String LATEST_SEARCH_RESULT = "LATEST_SEARCH_RESULT";
+    private final DataCache dataCache = DataCache.getInstance();
+    private final AtomicBoolean onLoadingMoreData = new AtomicBoolean(false);
 
     // ================ views ================
     private SearchView searchBar;
@@ -55,26 +65,33 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
         searchBar = root.findViewById(R.id.search_bar);
         initiateSearchBar();
 
+
         // initiate recycler view
         musicRecycler = root.findViewById(R.id.music_recycler);
         musicRecycler.setHasFixedSize(true);
         musicItemAdapter = new MusicItemAdapter();
         musicRecycler.setAdapter(musicItemAdapter);
-        musicRecycler.setLayoutManager(new LinearLayoutManager(root.getContext(), LinearLayoutManager.VERTICAL, false));
-        if (savedInstanceState != null) {
-            ArrayList<MusicItem> savedSearch = savedInstanceState.getParcelableArrayList(LATEST_SEARCH_RESULT);
-            musicItemAdapter.addAllItems(savedSearch);
-        }
+        LinearLayoutManager layoutManager = new LinearLayoutManager(root.getContext(), LinearLayoutManager.VERTICAL, false);
+        musicRecycler.setLayoutManager(layoutManager);
+        musicRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+                if (!onLoadingMoreData.get() && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
+                    // reached bottom, load more data
+                    if (!dataCache.getSearchCache().hasNoMoreData())
+                        loadMoreSearchResult(dataCache.getSearchCache().getPageIndex() + 1);
+                }
+            }
+        });
+        if (dataCache.getSearchCache().hasCachedData())
+            musicItemAdapter.updateData();
 
         return root;
     }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putParcelableArrayList(LATEST_SEARCH_RESULT, musicItemAdapter.getMusicList());
-        super.onSaveInstanceState(outState);
-    }
-
 
     @Override
     public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
@@ -98,7 +115,9 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
                         musicItems.add(item);
                     }
 
-                    requireActivity().runOnUiThread(() -> musicItemAdapter.addAllItems(musicItems));
+                    requireActivity().runOnUiThread(() -> musicItemAdapter.updateData());
+                    dataCache.getSearchCache().cacheResultList(musicItems);
+                    onLoadingMoreData.set(false);
                 } catch (JSONException e) {
                     Log.e(TAG, e.getMessage());
                 }
@@ -123,7 +142,10 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
         searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                dataCache.getSearchCache().clearCacheBuffer();
                 requestGenerator.searchContent(query, 0, SearchFragment.this);
+                dataCache.getSearchCache().setQueryString(query);
+                dataCache.getSearchCache().setPageIndex(0);
                 hideKeyboard(musicRecycler);
                 return true;
             }
@@ -135,8 +157,10 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
         });
     }
 
-    private void renderMusicList() {
-
+    private void loadMoreSearchResult(int pageIndex) {
+        onLoadingMoreData.set(true);
+        requestGenerator.searchContent(dataCache.getSearchCache().getQueryString(), pageIndex, SearchFragment.this);
+        dataCache.getSearchCache().setPageIndex(pageIndex);
     }
 
     private void hideKeyboard(View view) {
