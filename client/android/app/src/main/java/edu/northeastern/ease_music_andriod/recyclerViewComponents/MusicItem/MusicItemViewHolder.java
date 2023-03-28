@@ -1,8 +1,5 @@
 package edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem;
 
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
-import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -11,11 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
-
-import java.util.List;
-
 import edu.northeastern.ease_music_andriod.R;
 
 public class MusicItemViewHolder extends RecyclerView.ViewHolder {

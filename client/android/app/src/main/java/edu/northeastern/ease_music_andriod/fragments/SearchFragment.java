@@ -69,7 +69,7 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
         // initiate recycler view
         musicRecycler = root.findViewById(R.id.music_recycler);
         musicRecycler.setHasFixedSize(true);
-        musicItemAdapter = new MusicItemAdapter();
+        musicItemAdapter = new MusicItemAdapter(SearchFragment.this);
         musicRecycler.setAdapter(musicItemAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(root.getContext(), LinearLayoutManager.VERTICAL, false);
         musicRecycler.setLayoutManager(layoutManager);
