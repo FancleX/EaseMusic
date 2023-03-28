@@ -2,18 +2,14 @@ package edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
@@ -21,8 +17,6 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView;
 
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import edu.northeastern.ease_music_andriod.R;
 import edu.northeastern.ease_music_andriod.utils.DataCache;
@@ -35,7 +29,6 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemViewHolder> 
     public MusicItemAdapter(Fragment mainFragment) {
         this.mainFragment = mainFragment;
     }
-
 
     @NonNull
     @Override
@@ -65,8 +58,6 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemViewHolder> 
     public void onBrowserIconClick(View view, int position) {
         MusicItem musicItem = musicList.get(position);
         String uuid = musicItem.getUuid();
-
-        Log.i("Music Adapter", uuid);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mainFragment.getContext());
         LayoutInflater inflater = LayoutInflater.from(mainFragment.getContext());

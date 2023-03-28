@@ -22,6 +22,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,6 +48,7 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
     private static final String TAG = "Search Fragment";
     private final DataCache dataCache = DataCache.getInstance();
     private final AtomicBoolean onLoadingMoreData = new AtomicBoolean(false);
+    private final AtomicBoolean onSearchProgress = new AtomicBoolean(false);
 
     // ================ views ================
     private SearchView searchBar;
@@ -65,7 +67,6 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
         searchBar = root.findViewById(R.id.search_bar);
         initiateSearchBar();
 
-
         // initiate recycler view
         musicRecycler = root.findViewById(R.id.music_recycler);
         musicRecycler.setHasFixedSize(true);
@@ -80,13 +81,17 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
                 int visibleItemCount = layoutManager.getChildCount();
                 int totalItemCount = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
-                if (!onLoadingMoreData.get() && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
+                if (!onLoadingMoreData.get()
+                        && !onSearchProgress.get()
+                        && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                        && firstVisibleItemPosition >= 0) {
                     // reached bottom, load more data
                     if (!dataCache.getSearchCache().hasNoMoreData())
                         loadMoreSearchResult(dataCache.getSearchCache().getPageIndex() + 1);
                 }
             }
         });
+
         if (dataCache.getSearchCache().hasCachedData())
             musicItemAdapter.updateData();
 
@@ -115,11 +120,14 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
                         musicItems.add(item);
                     }
 
-                    requireActivity().runOnUiThread(() -> musicItemAdapter.updateData());
                     dataCache.getSearchCache().cacheResultList(musicItems);
-                    onLoadingMoreData.set(false);
+
+                    requireActivity().runOnUiThread(() -> musicItemAdapter.updateData());
                 } catch (JSONException e) {
                     Log.e(TAG, e.getMessage());
+                } finally {
+                    onLoadingMoreData.set(false);
+                    onSearchProgress.set(false);
                 }
                 break;
             case ACCESS_RESOURCE:
@@ -131,6 +139,9 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
     public void onError(String errorMessage, RequestAPIs.APILabel label) {
         switch (label) {
             case SEARCH_CONTENT:
+                onLoadingMoreData.set(false);
+                onSearchProgress.set(false);
+                Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
                 break;
             case ACCESS_RESOURCE:
                 break;
@@ -142,10 +153,14 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
         searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                dataCache.getSearchCache().clearCacheBuffer();
-                requestGenerator.searchContent(query, 0, SearchFragment.this);
-                dataCache.getSearchCache().setQueryString(query);
-                dataCache.getSearchCache().setPageIndex(0);
+                if (!onSearchProgress.get()) {
+                    onSearchProgress.set(true);
+                    dataCache.getSearchCache().clearCacheBuffer();
+                    dataCache.getSearchCache().setQueryString(query);
+                    dataCache.getSearchCache().setPageIndex(0);
+                    requestGenerator.searchContent(query, 0, SearchFragment.this);
+                }
+
                 hideKeyboard(musicRecycler);
                 return true;
             }
