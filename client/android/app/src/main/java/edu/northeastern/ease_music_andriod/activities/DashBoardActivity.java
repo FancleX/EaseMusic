@@ -20,7 +20,6 @@ public class DashBoardActivity extends AppCompatActivity {
 
     // ================ fields ================
 
-
     // ================ views ================
 
 
