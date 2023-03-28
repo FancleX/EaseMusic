@@ -112,16 +112,19 @@ public class APIRequestGenerator implements RequestAPIs {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.body() != null) {
                     try {
-                        JSONArray jsonArray = new JSONArray(response.body().string());
-                        JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("data", jsonArray);
+                        if (response.code() == 200) {
+                            JSONArray jsonArray = new JSONArray(response.body().string());
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("data", jsonArray);
 
-                        Log.i("API Request Generator", jsonObject.toString());
-
-                        if (response.code() == 200)
+                            Log.i("API Request Generator", jsonObject.toString());
                             callback.onSuccess(jsonObject, APILabel.SEARCH_CONTENT);
-                        else
+                        } else if (response.code() >= 400 && response.code() < 500) {
+                            JSONObject jsonObject = new JSONObject(response.body().string());
                             callback.onError(jsonObject.getString("message"), APILabel.SEARCH_CONTENT);
+                        } else {
+                            Log.e(TAG, response.toString());
+                        }
                     } catch (JSONException e) {
                         Log.e(TAG, e.getMessage());
                     }
