@@ -10,15 +10,15 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         app:cardBackgroundColor="@color/primary_color"
-        app:cardCornerRadius="30dp"
         app:cardElevation="5dp"
         >
 
         <ImageView
             android:layout_width="100dp"
-            android:layout_height="40dp"
+            android:layout_height="50dp"
             android:layout_gravity="start"
-            android:paddingTop="10dp"
+            android:padding="5dp"
+            android:foregroundGravity="center_vertical"
             android:layout_marginStart="10dp"
             android:src="@drawable/logo" />
 

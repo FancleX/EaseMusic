@@ -21,10 +21,14 @@
 
             <ImageView
                 android:id="@+id/song_icon"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
                 android:layout_marginStart="10dp"
                 android:src="@drawable/logo"
+                android:background="@drawable/music_icon_border"
+                android:elevation="5dp"
+                android:padding="5dp"
+                android:layout_centerVertical="true"
                 />
 
             <TextView
@@ -36,16 +40,31 @@
                 android:padding="13dp"
                 android:fontFamily="@font/dela_gothic_one"
                 android:textSize="15sp"
-                android:textColor="#C91E2730"
-                android:text="current playing song xxxxx" />
+                android:textColor="@color/primary_text_color"
+                android:text="@string/default_mini_player_text"
+                android:maxLines="1"/>
 
-            <ProgressBar
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="5dp"
                 android:layout_toEndOf="@id/song_name"
-                />
+                >
 
+                <ProgressBar
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="5dp"
+                    android:layout_centerInParent="true"
+                    style="@style/CircularProgressBar"/>
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="5dp"
+                    android:src="@drawable/pause_icon_24"
+                    android:layout_centerInParent="true" />
+
+            </RelativeLayout>
 
         </RelativeLayout>
 

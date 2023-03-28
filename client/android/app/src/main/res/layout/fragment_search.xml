@@ -3,13 +3,34 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.SearchFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment"
-        android:gravity="center" />
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:orientation="vertical"
+       >
+
+       <androidx.appcompat.widget.SearchView
+           android:id="@+id/search_bar"
+           android:layout_width="match_parent"
+           android:layout_height="50dp"
+           android:layout_margin="5dp"
+           android:padding="5dp"
+           android:background="@drawable/search_bar"
+           app:queryHint="Search a Music ..."
+           app:iconifiedByDefault="false"
+           app:queryBackground="@null"
+           />
+
+       <androidx.recyclerview.widget.RecyclerView
+           android:id="@+id/music_recycler"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:layout_margin="5dp"/>
+
+
+   </LinearLayout>
 
 </FrameLayout>

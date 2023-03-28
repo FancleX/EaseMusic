@@ -21,7 +21,6 @@ public class DashBoardActivity extends AppCompatActivity {
 
     // ================ fields ================
 
-
     // ================ views ================
 
 
@@ -31,8 +30,8 @@ public class DashBoardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dash_board);
 
         // register top panel
-        replaceTopPanelFragment(new TitleFragment());
-//        replaceTopPanelFragment(new MiniPlayerFragment());
+//        replaceTopPanelFragment(new TitleFragment());
+        replaceTopPanelFragment(new MiniPlayerFragment());
 
         // register bottom nav
         replaceFragment(new SearchFragment());
