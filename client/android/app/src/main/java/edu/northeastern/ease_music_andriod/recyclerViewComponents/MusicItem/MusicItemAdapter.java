@@ -9,7 +9,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
@@ -19,14 +18,15 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 import java.util.ArrayList;
 
 import edu.northeastern.ease_music_andriod.R;
+import edu.northeastern.ease_music_andriod.fragments.SearchFragment;
 import edu.northeastern.ease_music_andriod.utils.DataCache;
 
 public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemViewHolder> implements MusicItemViewHolder.OnMusicItemClickListener {
 
     private ArrayList<MusicItem> musicList;
-    private final Fragment mainFragment;
+    private final SearchFragment mainFragment;
 
-    public MusicItemAdapter(Fragment mainFragment) {
+    public MusicItemAdapter(SearchFragment mainFragment) {
         this.mainFragment = mainFragment;
     }
 
@@ -51,7 +51,8 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemViewHolder> 
 
     @Override
     public void onTextClick(View view, int position) {
-
+        MusicItem musicItem = musicList.get(position);
+        mainFragment.requestAudioResource(musicItem, position);
     }
 
     @Override

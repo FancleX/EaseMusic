@@ -1,26 +1,20 @@
 package edu.northeastern.ease_music_andriod.fragments;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
@@ -29,9 +23,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import edu.northeastern.ease_music_andriod.R;
@@ -39,12 +30,14 @@ import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.Musi
 import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItemAdapter;
 import edu.northeastern.ease_music_andriod.utils.APIRequestGenerator;
 import edu.northeastern.ease_music_andriod.utils.DataCache;
+import edu.northeastern.ease_music_andriod.utils.MusicPlayer;
 import edu.northeastern.ease_music_andriod.utils.RequestAPIs;
 
 public class SearchFragment extends Fragment implements APIRequestGenerator.RequestCallback {
 
     // ================ fields ================
     private final APIRequestGenerator requestGenerator = APIRequestGenerator.getInstance();
+    private final MusicPlayer musicPlayer = MusicPlayer.getInstance();
     private static final String TAG = "Search Fragment";
     private final DataCache dataCache = DataCache.getInstance();
     private final AtomicBoolean onLoadingMoreData = new AtomicBoolean(false);
@@ -131,6 +124,15 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
                 }
                 break;
             case ACCESS_RESOURCE:
+                try {
+                    String encodedAudioFile = response.getString("data");
+
+                    musicPlayer.setMusicSource(encodedAudioFile);
+
+                    requireActivity().runOnUiThread(this::renderSearchAndMiniPlayerFragments);
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
                 break;
         }
     }
@@ -144,6 +146,7 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
                 Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
                 break;
             case ACCESS_RESOURCE:
+                Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
                 break;
         }
     }
@@ -181,5 +184,19 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
     private void hideKeyboard(View view) {
         InputMethodManager inputMethodManager = (InputMethodManager) requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    public void requestAudioResource(MusicItem musicItem, int position) {
+        musicPlayer.setMusicItem(musicItem, position);
+        requestGenerator.accessResource(musicItem.getUuid(), SearchFragment.this);
+    }
+
+    private void renderSearchAndMiniPlayerFragments() {
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        fragmentTransaction.replace(R.id.frame_layout, new SearchFragment());
+        fragmentTransaction.replace(R.id.top_view_panel, new MiniPlayerFragment());
+        fragmentTransaction.commit();
     }
 }

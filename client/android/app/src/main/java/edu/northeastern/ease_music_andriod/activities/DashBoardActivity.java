@@ -30,8 +30,7 @@ public class DashBoardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dash_board);
 
         // register top panel
-//        replaceTopPanelFragment(new TitleFragment());
-        replaceTopPanelFragment(new MiniPlayerFragment());
+        replaceTopPanelFragment(new TitleFragment());
 
         // register bottom nav
         replaceFragment(new SearchFragment());
@@ -58,7 +57,7 @@ public class DashBoardActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    public void replaceTopPanelFragment(Fragment fragment) {
+    private void replaceTopPanelFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 

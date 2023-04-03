@@ -99,7 +99,6 @@ public class APIRequestGenerator implements RequestAPIs {
                 .method(method, null)
                 .build();
 
-
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -134,12 +133,52 @@ public class APIRequestGenerator implements RequestAPIs {
                 callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.SEARCH_CONTENT);
             }
         });
-
     }
 
     @Override
     public void accessResource(String uuid, RequestCallback callback) {
         String url = String.format(URLS[8], uuid), method = METHODS[0];
+
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .header("Accept-Ranges", "0-")
+                .method(method, null)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, e.getMessage());
+
+                callback.onError(e.getMessage(), APILabel.ACCESS_RESOURCE);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.body() != null) {
+                    try {
+                        if (response.code() == 200) {
+                            JSONObject jsonObject = new JSONObject(response.body().string());
+
+                            Log.i("API Request Generator", jsonObject.toString());
+                            callback.onSuccess(jsonObject, APILabel.ACCESS_RESOURCE);
+                        } else if (response.code() >= 400 && response.code() < 500) {
+                            JSONObject jsonObject = new JSONObject(response.body().string());
+                            callback.onError(jsonObject.getString("message"), APILabel.ACCESS_RESOURCE);
+                        } else {
+                            Log.e(TAG, response.toString());
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                    return;
+                }
+
+                callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.ACCESS_RESOURCE);
+            }
+        });
     }
 
 
