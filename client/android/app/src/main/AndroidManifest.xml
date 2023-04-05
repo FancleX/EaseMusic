@@ -16,6 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Easemusicandriod"
         android:usesCleartextTraffic="true"
+        android:largeHeap="true"
         tools:targetApi="31">
         <activity
             android:name=".activities.DashBoardActivity"

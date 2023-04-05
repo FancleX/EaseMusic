@@ -4,6 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.NavigationUI;
 
 import android.os.Bundle;
 
@@ -35,11 +38,18 @@ public class DashBoardActivity extends AppCompatActivity {
         // register bottom nav
         replaceFragment(new SearchFragment());
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+
+//        NavController navController = Navigation.findNavController(bottomNav);
+//
+//        NavigationUI.setupWithNavController(bottomNav, navController);
+
+
         bottomNav.setOnItemSelectedListener(item -> {
             final int id = item.getItemId();
 
             if (id == R.id.search)
                 replaceFragment(new SearchFragment());
+
             else if (id == R.id.music)
                 replaceFragment(new MusicFragment());
             else if (id == R.id.login)
@@ -47,6 +57,9 @@ public class DashBoardActivity extends AppCompatActivity {
 
             return true;
         });
+
+
+
     }
 
     private void replaceFragment(Fragment fragment) {

@@ -4,4 +4,8 @@
         <item name="android:background">@color/gray_400</item>
         <item name="exampleColor">@color/light_blue_400</item>
     </style>
+
+    <style name="progressBar" parent="@style/Theme.AppCompat">
+        <item name="colorAccent">@color/black</item>
+    </style>
 </resources>

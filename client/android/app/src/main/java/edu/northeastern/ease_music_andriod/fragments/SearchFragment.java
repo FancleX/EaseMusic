@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -128,9 +129,7 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
                     String encodedAudioFile = response.getString("data");
 
                     musicPlayer.setMusicSource(encodedAudioFile);
-
-                    requireActivity().runOnUiThread(this::renderSearchAndMiniPlayerFragments);
-                } catch (JSONException e) {
+                } catch (JSONException | IOException e) {
                     Log.e(TAG, e.getMessage());
                 }
                 break;
@@ -188,6 +187,7 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
 
     public void requestAudioResource(MusicItem musicItem, int position) {
         musicPlayer.setMusicItem(musicItem, position);
+        requireActivity().runOnUiThread(this::renderSearchAndMiniPlayerFragments);
         requestGenerator.accessResource(musicItem.getUuid(), SearchFragment.this);
     }
 
@@ -195,7 +195,7 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        fragmentTransaction.replace(R.id.frame_layout, new SearchFragment());
+        fragmentTransaction.replace(R.id.frame_layout, new MusicFragment());
         fragmentTransaction.replace(R.id.top_view_panel, new MiniPlayerFragment());
         fragmentTransaction.commit();
     }

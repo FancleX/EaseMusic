@@ -7,6 +7,7 @@
 
     tools:context=".activities.DashBoardActivity">
 
+
     <FrameLayout
         android:id="@+id/top_view_panel"
         android:layout_width="match_parent"
