@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import edu.northeastern.ease_music_andriod.R;
 import edu.northeastern.ease_music_andriod.fragments.SearchFragment;
 import edu.northeastern.ease_music_andriod.utils.DataCache;
+import edu.northeastern.ease_music_andriod.utils.MusicPlayer;
 
 public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemViewHolder> implements MusicItemViewHolder.OnMusicItemClickListener {
 
@@ -39,7 +40,7 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull MusicItemViewHolder holder, int position) {
         Animation animation = AnimationUtils.loadAnimation(holder.itemView.getContext(), android.R.anim.slide_in_left);
-        holder.bindData(musicList.get(position));
+        holder.bindData(musicList.get(position), position);
         holder.itemView.startAnimation(animation);
     }
 
@@ -57,6 +58,11 @@ public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemViewHolder> 
 
     @Override
     public void onBrowserIconClick(View view, int position) {
+        // pause music player
+        MusicPlayer instance = MusicPlayer.getInstance();
+        if (instance.isReady() && instance.isPlaying())
+            instance.pause();
+
         MusicItem musicItem = musicList.get(position);
         String uuid = musicItem.getUuid();
 

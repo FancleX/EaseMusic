@@ -1,5 +1,6 @@
 package edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem;
 
+import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -9,7 +10,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
+
+
 import edu.northeastern.ease_music_andriod.R;
+import edu.northeastern.ease_music_andriod.utils.MusicPlayer;
 
 public class MusicItemViewHolder extends RecyclerView.ViewHolder {
 
@@ -35,7 +39,7 @@ public class MusicItemViewHolder extends RecyclerView.ViewHolder {
         browserIcon.setOnClickListener(view -> listener.onBrowserIconClick(view, getAdapterPosition()));
     }
 
-    public void bindData(MusicItem item) {
+    public void bindData(MusicItem item, int position) {
         Picasso.get()
                 .load(item.getThumbnail())
                 .resize(50, 50)
@@ -45,6 +49,13 @@ public class MusicItemViewHolder extends RecyclerView.ViewHolder {
         title.setText(item.getTitle());
         author.setText(item.getAuthor());
         description.setText(item.getDescription());
+        title.setTextColor(Color.parseColor("#595d63"));
+
+        MusicPlayer instance = MusicPlayer.getInstance();
+        if (position == instance.getMusicIndex() && item.getUuid().equals(instance.getMusicUuid())) {
+            title.setTextColor(Color.parseColor("#39C5BB"));
+        }
+
     }
 
     public interface OnMusicItemClickListener {

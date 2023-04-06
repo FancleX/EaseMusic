@@ -1,26 +1,19 @@
 package edu.northeastern.ease_music_andriod.fragments;
 
 import android.animation.ObjectAnimator;
-import android.app.ProgressDialog;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.squareup.picasso.Picasso;
 
 import java.util.Locale;
@@ -38,7 +31,7 @@ public class MusicFragment extends Fragment {
     private final Handler handler = new Handler();
     private static final String TAG = "Music Fragment";
     private final UIUpdater uiUpdater = new UIUpdater();
-    private long animationOffsetTime;
+    private String currentMusicId = "";
 
     // ================ views ================
     private TextView title, author;
@@ -76,15 +69,15 @@ public class MusicFragment extends Fragment {
         // assign values
         title.setText(musicPlayer.getMusicName());
         title.setSelected(true);
+        title.setMarqueeRepeatLimit(-1);
         author.setText(musicPlayer.getMusicAuthor());
         Picasso.get()
                 .load(musicPlayer.getMusicAlbumIcon())
-                .resize(65, 65)
+                .resize(70, 70)
                 .transform(new CropCircleTransformation())
                 .into(albumIcon);
 
-        float albumCoverRotation = albumCover.getRotation();
-        animator = ObjectAnimator.ofFloat(albumCover, "rotation", albumCoverRotation, albumCoverRotation + 360f);
+        animator = ObjectAnimator.ofFloat(albumCover, "rotation", 0f,  360f);
         animator.setDuration(10000);
         animator.setRepeatCount(ObjectAnimator.INFINITE);
         animator.setRepeatMode(ObjectAnimator.RESTART);
@@ -94,73 +87,35 @@ public class MusicFragment extends Fragment {
         shareIcon.setOnClickListener(view -> {});
         addFavoriteIcon.setOnClickListener(view -> {});
         downloadIcon.setOnClickListener(view -> {});
-        previousIcon.setOnClickListener(view -> playLastMusic());
+        previousIcon.setOnClickListener(view -> musicPlayer.playLastMusic());
         playIcon.setOnClickListener(view -> {
             if (musicPlayer.isPlaying())
                 musicPlayer.pause();
             else
                 musicPlayer.start();
         });
-        nextIcon.setOnClickListener(view -> playNextMusic());
+        nextIcon.setOnClickListener(view -> musicPlayer.playNextMusic());
 
         progressIndicator.setVisibility(View.VISIBLE);
+        currentMusicId = musicPlayer.getMusicUuid();
 
-        musicPlayer.setOnPreparedListener(mediaPlayer -> {
-            progressIndicator.setVisibility(View.GONE);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if (b)
+                    musicPlayer.seekTo(i);
+            }
 
-            totalTime.setText(formatPlayTime(musicPlayer.getDuration()));
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
-            playMusic();
-
-            requireActivity().runOnUiThread(uiUpdater);
-
-            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                    if (b) {
-                        musicPlayer.seekTo(i);
-                    }
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-
-                }
-            });
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
+        requireActivity().runOnUiThread(uiUpdater);
+
         return root;
-    }
-
-    private void playMusic() {
-        // play animation and show pause icon
-        animator.start();
-        playIcon.setImageResource(R.drawable.pause_outline_icon_64);
-        seekBar.setProgress(0);
-        seekBar.setMax(musicPlayer.getDuration());
-
-        musicPlayer.start();
-    }
-
-    private void pauseMusic() {
-        musicPlayer.pause();
-    }
-
-    private void resumeMusic() {
-        musicPlayer.start();
-    }
-
-    private void playNextMusic() {
-
-    }
-
-    private void playLastMusic() {
-
     }
 
     private String formatPlayTime(int length) {
@@ -173,22 +128,52 @@ public class MusicFragment extends Fragment {
     private class UIUpdater implements Runnable {
         @Override
         public void run() {
-            if (musicPlayer.isPlaying()) {
+            if (musicPlayer.isReady()) {
                 int position = musicPlayer.getCurrentPosition();
                 seekBar.setProgress(position);
                 currentTime.setText(formatPlayTime(position));
+                progressIndicator.setVisibility(View.INVISIBLE);
+                seekBar.setMax(musicPlayer.getDuration());
+                totalTime.setText(formatPlayTime(musicPlayer.getDuration()));
 
-                if (albumCover.getAnimation() == null)
-                    animator.resume();
 
-                playIcon.setImageResource(R.drawable.pause_outline_icon_64);
+                if (musicPlayer.isPlaying()) {
+
+                    if (!currentMusicId.equals(musicPlayer.getMusicUuid())) {
+                        currentMusicId = musicPlayer.getMusicUuid();
+
+                        // update display
+                        title.setText(musicPlayer.getMusicName());
+                        author.setText(musicPlayer.getMusicAuthor());
+
+                        Picasso.get()
+                                .load(musicPlayer.getMusicAlbumIcon())
+                                .resize(70, 70)
+                                .transform(new CropCircleTransformation())
+                                .into(albumIcon);
+                    }
+
+                    if (animator.isPaused())
+                        animator.resume();
+
+                    playIcon.setImageResource(R.drawable.pause_outline_icon_64);
+                } else {
+                    animator.start();
+                    animator.pause();
+
+                    playIcon.setImageResource(R.drawable.play_circle_outline_64);
+                }
+
             } else {
+                animator.start();
                 animator.pause();
                 playIcon.setImageResource(R.drawable.play_circle_outline_64);
+                progressIndicator.setVisibility(View.VISIBLE);
             }
 
-            handler.postDelayed(this, 100);
+            handler.postDelayed(this, 200);
         }
     }
+
 
 }

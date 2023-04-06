@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -139,7 +140,9 @@ public class APIRequestGenerator implements RequestAPIs {
     public void accessResource(String uuid, RequestCallback callback) {
         String url = String.format(URLS[8], uuid), method = METHODS[0];
 
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .callTimeout(1, TimeUnit.MINUTES)
+                .build();
 
         Request request = new Request.Builder()
                 .url(url)
