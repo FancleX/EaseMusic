@@ -3,10 +3,9 @@ package edu.northeastern.ease_music_andriod.utils;
 import android.media.AudioAttributes;
 import android.media.MediaDataSource;
 import android.media.MediaPlayer;
+import android.media.audiofx.Visualizer;
 import android.os.Process;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,16 +25,18 @@ public class MusicPlayer extends MediaPlayer {
     private final APIRequestGenerator requestGenerator = APIRequestGenerator.getInstance();
     private final DataCache dataCache = DataCache.getInstance();
     private CallbackActivity callbackActivity;
+    private OnUpdateCallback onUpdateCallback;
+    private OnWaveGeneratedCallback onWaveGeneratedCallback;
     private final AtomicBoolean isReady = new AtomicBoolean(false);
-    private OnNextCallback onNextCallback;
+    private final Visualizer visualizer;
 
     private int musicIndex = -1;
     private MusicItem musicItem;
     private byte[] musicBlob;
-    private double[] magnitudes;
 
     private MusicPlayer() {
         super();
+
         setOnCompletionListener(mediaPlayer -> playNextMusic());
         setOnPreparedListener(mediaPlayer -> {
             isReady.set(true);
@@ -51,6 +52,22 @@ public class MusicPlayer extends MediaPlayer {
         );
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+
+        visualizer = new Visualizer(getAudioSessionId());
+        visualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+        visualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+            @Override
+            public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes, int i) {
+                if (onWaveGeneratedCallback != null)
+                    onWaveGeneratedCallback.onWaveGenerated(bytes);
+            }
+
+            @Override
+            public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int i) {
+
+            }
+        }, Visualizer.getMaxCaptureRate() / 2, true, false);
+        visualizer.setEnabled(true);
     }
 
     public static MusicPlayer getInstance() {
@@ -83,18 +100,24 @@ public class MusicPlayer extends MediaPlayer {
     public boolean isReady() {
         return isReady.get();
     }
+    public void attachCallbackActivity(CallbackActivity callbackActivity) {
+        this.callbackActivity = callbackActivity;
+    }
+    public void attachOnUpdateCallback(OnUpdateCallback callback) {
+        this.onUpdateCallback = callback;
+    }
+    public void attachOnWaveGeneratedCallback(OnWaveGeneratedCallback callback) {
+        this.onWaveGeneratedCallback = callback;
+    }
 
     private synchronized void setMusicSource(String src) throws IOException {
         if (musicBlob != null)
             resetPlayer();
 
-        isReady.set(false);
         musicBlob = Base64.getDecoder().decode(src);
         MediaDataSource dataSource = new ByteArrayMediaDataSource(musicBlob);
         setDataSource(dataSource);
         prepareAsync();
-//        Log.i("Music Player", String.valueOf(musicBlob.length));
-//        computeMagnitude();
     }
 
     public void requestMusic(MusicItem musicItem, int position) {
@@ -105,6 +128,8 @@ public class MusicPlayer extends MediaPlayer {
             return;
         if (musicBlob != null && isPlaying())
             pause();
+
+        isReady.set(false);
 
         requestGenerator.accessResource(musicItem.getUuid(), new APIRequestGenerator.RequestCallback() {
             @Override
@@ -126,45 +151,12 @@ public class MusicPlayer extends MediaPlayer {
         });
     }
 
-
-
-    public void attachCallbackActivity(CallbackActivity callbackActivity) {
-        this.callbackActivity = callbackActivity;
-    }
-
     private void resetPlayer() {
         stop();
         reset();
 
         musicBlob = null;
-        magnitudes = null;
     }
-
-    private void computeMagnitude() {
-        int n = musicBlob.length;
-        double[] input = new double[n];
-
-        // convert bytes to doubles
-        for (int i = 0; i < n; i++) {
-            input[i] = musicBlob[i] / 255.0;
-        }
-
-        DoubleFFT_1D fft = new DoubleFFT_1D(n);
-        fft.realForward(input);
-
-        // calculate magnitudes
-        magnitudes = new double[n/2+1];
-        magnitudes[0] = Math.abs(input[0]);
-        for (int i = 1; i < n/2; i++) {
-            magnitudes[i] = Math.sqrt(input[2*i]*input[2*i] + input[2*i+1]*input[2*i+1]);
-        }
-        magnitudes[n/2] = Math.abs(input[1]);
-    }
-
-    public double[] getMagnitude() {
-        return magnitudes;
-    }
-
 
     public void playNextMusic() {
         ArrayList<MusicItem> resultList = dataCache.getSearchCache().getResultList();
@@ -178,7 +170,10 @@ public class MusicPlayer extends MediaPlayer {
 
         pause();
 
-        onNextCallback.onNext(musicItem.getUuid(), musicIndex);
+        isReady.set(false);
+
+        if (onUpdateCallback != null)
+            onUpdateCallback.onNext(musicItem.getUuid(), musicIndex);
 
         requestGenerator.accessResource(musicItem.getUuid(), new APIRequestGenerator.RequestCallback() {
             @Override
@@ -207,9 +202,16 @@ public class MusicPlayer extends MediaPlayer {
             return;
 
         MusicItem musicItem = resultList.get(musicIndex - 1);
+        this.musicItem = musicItem;
         musicIndex--;
 
         pause();
+
+        isReady.set(false);
+
+        if (onUpdateCallback != null)
+            onUpdateCallback.onLast(musicItem.getUuid(), musicIndex);
+
         requestGenerator.accessResource(musicItem.getUuid(), new APIRequestGenerator.RequestCallback() {
             @Override
             public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
@@ -230,15 +232,16 @@ public class MusicPlayer extends MediaPlayer {
         });
     }
 
-    public void attachOnNextCallback(OnNextCallback callback) {
-        this.onNextCallback = callback;
-    }
-
     public interface CallbackActivity {
         void onError(String error);
     }
 
-    public interface OnNextCallback {
+    public interface OnUpdateCallback {
         void onNext(String nextMusicId, int nextPosition);
+        void onLast(String lastMusicId, int lastPosition);
+    }
+
+    public interface OnWaveGeneratedCallback {
+        void onWaveGenerated(byte[] waves);
     }
 }

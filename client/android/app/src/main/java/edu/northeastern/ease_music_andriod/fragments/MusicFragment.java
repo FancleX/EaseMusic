@@ -1,6 +1,8 @@
 package edu.northeastern.ease_music_andriod.fragments;
 
+import android.Manifest;
 import android.animation.ObjectAnimator;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -82,7 +84,11 @@ public class MusicFragment extends Fragment {
         animator.setRepeatCount(ObjectAnimator.INFINITE);
         animator.setRepeatMode(ObjectAnimator.RESTART);
 
-        //        visualizationView.setMagnitude(musicPlayer.getMagnitude());
+//        if (requireActivity().checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+//            musicPlayer.attachOnWaveGeneratedCallback(visualizationView);
+//        }
+
+        musicPlayer.attachOnWaveGeneratedCallback(visualizationView);
 
         shareIcon.setOnClickListener(view -> {});
         addFavoriteIcon.setOnClickListener(view -> {});
@@ -136,7 +142,6 @@ public class MusicFragment extends Fragment {
                 seekBar.setMax(musicPlayer.getDuration());
                 totalTime.setText(formatPlayTime(musicPlayer.getDuration()));
 
-
                 if (musicPlayer.isPlaying()) {
 
                     if (!currentMusicId.equals(musicPlayer.getMusicUuid())) {
@@ -153,8 +158,11 @@ public class MusicFragment extends Fragment {
                                 .into(albumIcon);
                     }
 
-                    if (animator.isPaused())
+                    if (animator.isPaused()) {
                         animator.resume();
+                    } else if (!animator.isStarted()) {
+                        animator.start();
+                    }
 
                     playIcon.setImageResource(R.drawable.pause_outline_icon_64);
                 } else {

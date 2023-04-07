@@ -39,7 +39,7 @@ import edu.northeastern.ease_music_andriod.utils.DataCache;
 import edu.northeastern.ease_music_andriod.utils.MusicPlayer;
 import edu.northeastern.ease_music_andriod.utils.RequestAPIs;
 
-public class SearchFragment extends Fragment implements APIRequestGenerator.RequestCallback, MusicPlayer.OnNextCallback {
+public class SearchFragment extends Fragment implements APIRequestGenerator.RequestCallback, MusicPlayer.OnUpdateCallback {
 
     // ================ fields ================
     private final APIRequestGenerator requestGenerator = APIRequestGenerator.getInstance();
@@ -97,7 +97,7 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
         if (dataCache.getSearchCache().hasCachedData())
             musicItemAdapter.updateData();
 
-        musicPlayer.attachOnNextCallback(this);
+        musicPlayer.attachOnUpdateCallback(this);
 
         return root;
     }
@@ -216,6 +216,27 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
             TextView nextMusicTitle = nextViewHolder.itemView.findViewById(R.id.music_title);
             nextMusicTitle.setTextColor(Color.parseColor("#39C5BB"));
         }
-
     }
+
+    @Override
+    public void onLast(String lastMusicId, int lastPosition) {
+        if (lastMusicId == null)
+            return;
+
+        RecyclerView.LayoutManager layoutManager = musicRecycler.getLayoutManager();
+        if (layoutManager != null) {
+            View lastView = layoutManager.getChildAt(lastPosition + 1);
+            assert lastView != null;
+            RecyclerView.ViewHolder lastViewHolder = musicRecycler.getChildViewHolder(lastView);
+            TextView lastMusicTitle = lastViewHolder.itemView.findViewById(R.id.music_title);
+            lastMusicTitle.setTextColor(Color.parseColor("#595d63"));
+
+            View nextView = layoutManager.getChildAt(lastPosition);
+            assert nextView != null;
+            RecyclerView.ViewHolder nextViewHolder = musicRecycler.getChildViewHolder(nextView);
+            TextView nextMusicTitle = nextViewHolder.itemView.findViewById(R.id.music_title);
+            nextMusicTitle.setTextColor(Color.parseColor("#39C5BB"));
+        }
+    }
+
 }

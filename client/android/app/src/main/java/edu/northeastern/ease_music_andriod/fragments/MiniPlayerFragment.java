@@ -120,6 +120,8 @@ public class MiniPlayerFragment extends Fragment {
                 } else {
                     playPauseIcon.setImageResource(R.drawable.play_icon_24);
                 }
+            } else {
+                playPauseIcon.setImageResource(R.drawable.play_icon_24);
             }
 
             handler.postDelayed(this, 250);
