@@ -5,9 +5,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -40,14 +39,19 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
         replaceFragment(new SearchFragment(this));
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
 
+        MenuItem menuItem = bottomNav.getMenu().findItem(R.id.music);
+        menuItem.setEnabled(false);
+
         bottomNav.setOnItemSelectedListener(item -> {
             final int id = item.getItemId();
 
             if (id == R.id.search)
                 replaceFragment(new SearchFragment(this));
-            else if (id == R.id.music)
-                replaceFragment(new MusicFragment());
-            else if (id == R.id.login)
+            else if (id == R.id.music) {
+                if (MusicPlayer.getInstance().getMusicUuid() != null) {
+                    replaceFragment(new MusicFragment());
+                }
+            } else if (id == R.id.login)
                 replaceFragment(new LoginFragment());
 
             return true;

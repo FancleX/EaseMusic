@@ -33,11 +33,6 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
-        requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 123);
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
         // add animations
         top2BotAnim = AnimationUtils.loadAnimation(this, R.anim.top_to_bottom_move_animation);
         bot2TopAnim = AnimationUtils.loadAnimation(this, R.anim.botton_to_top_move_animation);

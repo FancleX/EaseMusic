@@ -93,11 +93,15 @@ public class APIRequestGenerator implements RequestAPIs {
     public void searchContent(String queryString, int pageIndex, RequestCallback callback) {
         String url = String.format(Locale.US, URLS[7], queryString, pageIndex), method = METHODS[0];
 
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .callTimeout(1, TimeUnit.MINUTES)
+                .readTimeout(1, TimeUnit.MINUTES)
+                .build();
 
         Request request = new Request.Builder()
                 .url(url)
                 .method(method, null)
+                .header("Connection", "keep-alive")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -142,11 +146,13 @@ public class APIRequestGenerator implements RequestAPIs {
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .callTimeout(1, TimeUnit.MINUTES)
+                .readTimeout(1, TimeUnit.MINUTES)
                 .build();
 
         Request request = new Request.Builder()
                 .url(url)
                 .header("Accept-Ranges", "0-")
+                .header("Connection", "keep-alive")
                 .method(method, null)
                 .build();
 

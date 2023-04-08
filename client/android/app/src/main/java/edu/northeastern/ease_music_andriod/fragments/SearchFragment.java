@@ -178,7 +178,6 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
 
     public void requestAudioResource(MusicItem musicItem, int position) {
         requireActivity().runOnUiThread(this::renderSearchAndMiniPlayerFragments);
-//        requestGenerator.accessResource(musicItem.getUuid(), SearchFragment.this);
         musicPlayer.requestMusic(musicItem, position);
     }
 
@@ -189,6 +188,7 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
 
         BottomNavigationView navigationView = requireActivity().findViewById(R.id.bottom_navigation);
         MenuItem item = navigationView.getMenu().findItem(R.id.music);
+        item.setEnabled(true);
         item.setChecked(true);
 
         fragmentTransaction.replace(R.id.frame_layout, new MusicFragment());

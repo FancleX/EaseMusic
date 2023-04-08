@@ -28,7 +28,7 @@ public class MusicPlayer extends MediaPlayer {
     private OnUpdateCallback onUpdateCallback;
     private OnWaveGeneratedCallback onWaveGeneratedCallback;
     private final AtomicBoolean isReady = new AtomicBoolean(false);
-    private final Visualizer visualizer;
+    private Visualizer visualizer;
 
     private int musicIndex = -1;
     private MusicItem musicItem;
@@ -52,22 +52,6 @@ public class MusicPlayer extends MediaPlayer {
         );
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
-
-        visualizer = new Visualizer(getAudioSessionId());
-        visualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
-        visualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
-            @Override
-            public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes, int i) {
-                if (onWaveGeneratedCallback != null)
-                    onWaveGeneratedCallback.onWaveGenerated(bytes);
-            }
-
-            @Override
-            public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int i) {
-
-            }
-        }, Visualizer.getMaxCaptureRate() / 2, true, false);
-        visualizer.setEnabled(true);
     }
 
     public static MusicPlayer getInstance() {
@@ -108,6 +92,29 @@ public class MusicPlayer extends MediaPlayer {
     }
     public void attachOnWaveGeneratedCallback(OnWaveGeneratedCallback callback) {
         this.onWaveGeneratedCallback = callback;
+    }
+
+    public void enableVisualizer() {
+        if (visualizer != null)
+            return;
+
+        synchronized (this) {
+            visualizer = new Visualizer(getAudioSessionId());
+            visualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+            visualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+                @Override
+                public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes, int i) {
+
+                }
+
+                @Override
+                public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int i) {
+                    if (onWaveGeneratedCallback != null)
+                        onWaveGeneratedCallback.onWaveGenerated(bytes);
+                }
+            }, Visualizer.getMaxCaptureRate(), false, true);
+            visualizer.setEnabled(true);
+        }
     }
 
     private synchronized void setMusicSource(String src) throws IOException {

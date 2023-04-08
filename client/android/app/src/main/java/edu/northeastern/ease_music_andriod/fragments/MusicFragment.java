@@ -38,7 +38,8 @@ public class MusicFragment extends Fragment {
     // ================ views ================
     private TextView title, author;
     private ImageView albumCover, albumIcon;
-    private ObjectAnimator animator;
+    private ObjectAnimator coverAnimator;
+    private ObjectAnimator albumAnimator;
     private SoundVisualizationView visualizationView;
     private ImageView shareIcon, addFavoriteIcon, downloadIcon;
     private SeekBar seekBar;
@@ -56,7 +57,6 @@ public class MusicFragment extends Fragment {
         author = root.findViewById(R.id.music_player_author);
         albumCover = root.findViewById(R.id.player_album_cover);
         albumIcon = root.findViewById(R.id.player_album_icon);
-        visualizationView = root.findViewById(R.id.player_sound_visualization_section);
         shareIcon = root.findViewById(R.id.player_share_icon);
         addFavoriteIcon = root.findViewById(R.id.player_favorite_icon);
         downloadIcon = root.findViewById(R.id.player_download_icon);
@@ -79,16 +79,23 @@ public class MusicFragment extends Fragment {
                 .transform(new CropCircleTransformation())
                 .into(albumIcon);
 
-        animator = ObjectAnimator.ofFloat(albumCover, "rotation", 0f,  360f);
-        animator.setDuration(10000);
-        animator.setRepeatCount(ObjectAnimator.INFINITE);
-        animator.setRepeatMode(ObjectAnimator.RESTART);
+        coverAnimator = ObjectAnimator.ofFloat(albumCover, "rotation", 0f,  360f);
+        coverAnimator.setDuration(20000);
+        coverAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        coverAnimator.setRepeatMode(ObjectAnimator.RESTART);
 
-//        if (requireActivity().checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-//            musicPlayer.attachOnWaveGeneratedCallback(visualizationView);
-//        }
+        albumAnimator = ObjectAnimator.ofFloat(albumIcon, "rotation", 0f, 360f);
+        albumAnimator.setDuration(20000);
+        albumAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        coverAnimator.setRepeatMode(ObjectAnimator.RESTART);
 
-        musicPlayer.attachOnWaveGeneratedCallback(visualizationView);
+        requireActivity().requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 123);
+        if (requireActivity().checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            // render visualizer
+            visualizationView = root.findViewById(R.id.player_sound_visualization);
+            musicPlayer.enableVisualizer();
+            musicPlayer.attachOnWaveGeneratedCallback(visualizationView);
+        }
 
         shareIcon.setOnClickListener(view -> {});
         addFavoriteIcon.setOnClickListener(view -> {});
@@ -158,23 +165,30 @@ public class MusicFragment extends Fragment {
                                 .into(albumIcon);
                     }
 
-                    if (animator.isPaused()) {
-                        animator.resume();
-                    } else if (!animator.isStarted()) {
-                        animator.start();
+                    if (coverAnimator.isPaused()) {
+                        coverAnimator.resume();
+                        albumAnimator.resume();
+                    } else if (!coverAnimator.isStarted()) {
+                        coverAnimator.start();
+                        albumAnimator.start();
                     }
 
                     playIcon.setImageResource(R.drawable.pause_outline_icon_64);
                 } else {
-                    animator.start();
-                    animator.pause();
+                    coverAnimator.start();
+                    coverAnimator.pause();
+                    albumAnimator.start();
+                    albumAnimator.pause();
 
                     playIcon.setImageResource(R.drawable.play_circle_outline_64);
                 }
 
             } else {
-                animator.start();
-                animator.pause();
+                coverAnimator.start();
+                coverAnimator.pause();
+                albumAnimator.start();
+                albumAnimator.pause();
+
                 playIcon.setImageResource(R.drawable.play_circle_outline_64);
                 progressIndicator.setVisibility(View.VISIBLE);
             }
