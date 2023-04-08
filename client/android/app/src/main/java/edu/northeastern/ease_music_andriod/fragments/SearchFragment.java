@@ -205,16 +205,18 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
         RecyclerView.LayoutManager layoutManager = musicRecycler.getLayoutManager();
         if (layoutManager != null) {
             View lastView = layoutManager.getChildAt(nextPosition - 1);
-            assert lastView != null;
-            RecyclerView.ViewHolder lastViewHolder = musicRecycler.getChildViewHolder(lastView);
-            TextView lastMusicTitle = lastViewHolder.itemView.findViewById(R.id.music_title);
-            lastMusicTitle.setTextColor(Color.parseColor("#595d63"));
+            if (lastView != null) {
+                RecyclerView.ViewHolder lastViewHolder = musicRecycler.getChildViewHolder(lastView);
+                TextView lastMusicTitle = lastViewHolder.itemView.findViewById(R.id.music_title);
+                lastMusicTitle.setTextColor(Color.parseColor("#595d63"));
+            }
 
             View nextView = layoutManager.getChildAt(nextPosition);
-            assert nextView != null;
-            RecyclerView.ViewHolder nextViewHolder = musicRecycler.getChildViewHolder(nextView);
-            TextView nextMusicTitle = nextViewHolder.itemView.findViewById(R.id.music_title);
-            nextMusicTitle.setTextColor(Color.parseColor("#39C5BB"));
+            if (nextView != null) {
+                RecyclerView.ViewHolder nextViewHolder = musicRecycler.getChildViewHolder(nextView);
+                TextView nextMusicTitle = nextViewHolder.itemView.findViewById(R.id.music_title);
+                nextMusicTitle.setTextColor(Color.parseColor("#39C5BB"));
+            }
         }
     }
 
@@ -226,16 +228,18 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
         RecyclerView.LayoutManager layoutManager = musicRecycler.getLayoutManager();
         if (layoutManager != null) {
             View lastView = layoutManager.getChildAt(lastPosition + 1);
-            assert lastView != null;
-            RecyclerView.ViewHolder lastViewHolder = musicRecycler.getChildViewHolder(lastView);
-            TextView lastMusicTitle = lastViewHolder.itemView.findViewById(R.id.music_title);
-            lastMusicTitle.setTextColor(Color.parseColor("#595d63"));
+            if (lastView != null) {
+                RecyclerView.ViewHolder lastViewHolder = musicRecycler.getChildViewHolder(lastView);
+                TextView lastMusicTitle = lastViewHolder.itemView.findViewById(R.id.music_title);
+                lastMusicTitle.setTextColor(Color.parseColor("#595d63"));
+            }
 
             View nextView = layoutManager.getChildAt(lastPosition);
-            assert nextView != null;
-            RecyclerView.ViewHolder nextViewHolder = musicRecycler.getChildViewHolder(nextView);
-            TextView nextMusicTitle = nextViewHolder.itemView.findViewById(R.id.music_title);
-            nextMusicTitle.setTextColor(Color.parseColor("#39C5BB"));
+            if (nextView != null) {
+                RecyclerView.ViewHolder nextViewHolder = musicRecycler.getChildViewHolder(nextView);
+                TextView nextMusicTitle = nextViewHolder.itemView.findViewById(R.id.music_title);
+                nextMusicTitle.setTextColor(Color.parseColor("#39C5BB"));
+            }
         }
     }
 
