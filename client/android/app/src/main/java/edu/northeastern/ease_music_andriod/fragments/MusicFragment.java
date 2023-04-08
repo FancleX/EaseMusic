@@ -5,6 +5,11 @@ import android.animation.ObjectAnimator;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
@@ -18,7 +23,10 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import edu.northeastern.ease_music_andriod.R;
@@ -34,6 +42,7 @@ public class MusicFragment extends Fragment {
     private static final String TAG = "Music Fragment";
     private final UIUpdater uiUpdater = new UIUpdater();
     private String currentMusicId = "";
+    private ActivityResultLauncher<String[]> requestPermissionLauncher;
 
     // ================ views ================
     private TextView title, author;
@@ -89,14 +98,30 @@ public class MusicFragment extends Fragment {
         albumAnimator.setRepeatCount(ObjectAnimator.INFINITE);
         coverAnimator.setRepeatMode(ObjectAnimator.RESTART);
 
-        requireActivity().requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 123);
-        if (requireActivity().checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            // render visualizer
-            visualizationView = root.findViewById(R.id.player_sound_visualization);
-            musicPlayer.enableVisualizer();
-            musicPlayer.attachOnWaveGeneratedCallback(visualizationView);
-        }
+        // request permissions
+        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), results -> {
+            for (Map.Entry<String, Boolean> result : results.entrySet()) {
+                if (result.getKey().equals(Manifest.permission.RECORD_AUDIO))
+                    renderVisualizer(root);
+                else if (result.getKey().equals(Manifest.permission.VIBRATE))
+                    musicPlayer.enableVibrator();
+            }
+        });
 
+        List<String> permissions = new ArrayList<>();
+        if (requireActivity().checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
+            permissions.add(Manifest.permission.RECORD_AUDIO);
+        else
+            renderVisualizer(root);
+
+        if (requireActivity().checkSelfPermission(Manifest.permission.VIBRATE) != PackageManager.PERMISSION_GRANTED)
+            permissions.add(Manifest.permission.VIBRATE);
+        else
+            musicPlayer.enableVibrator();
+
+        requestPermissionLauncher.launch(permissions.toArray(new String[0]));
+
+        // add callbacks
         shareIcon.setOnClickListener(view -> {});
         addFavoriteIcon.setOnClickListener(view -> {});
         downloadIcon.setOnClickListener(view -> {});
@@ -136,6 +161,13 @@ public class MusicFragment extends Fragment {
                 "%02d:%02d",
                 TimeUnit.MILLISECONDS.toMinutes(length) % TimeUnit.HOURS.toMinutes(1),
                 TimeUnit.MILLISECONDS.toSeconds(length) % TimeUnit.MINUTES.toSeconds(1));
+    }
+
+
+    private void renderVisualizer(View root) {
+        visualizationView = root.findViewById(R.id.player_sound_visualization);
+        musicPlayer.enableVisualizer();
+        musicPlayer.attachOnWaveGeneratedCallback(visualizationView);
     }
 
     private class UIUpdater implements Runnable {

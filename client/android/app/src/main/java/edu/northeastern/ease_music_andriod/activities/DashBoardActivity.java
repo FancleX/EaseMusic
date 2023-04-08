@@ -30,7 +30,9 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dash_board);
 
-        MusicPlayer.getInstance().attachCallbackActivity(this);
+        MusicPlayer musicPlayer = MusicPlayer.getInstance();
+        musicPlayer.attachCallbackActivity(this);
+        musicPlayer.attachRootContext(getApplicationContext());
 
         // register top panel
         replaceTopPanelFragment(new TitleFragment());

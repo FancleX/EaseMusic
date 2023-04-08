@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -91,7 +92,9 @@ public class APIRequestGenerator implements RequestAPIs {
 
     @Override
     public void searchContent(String queryString, int pageIndex, RequestCallback callback) {
-        String url = String.format(Locale.US, URLS[7], queryString, pageIndex), method = METHODS[0];
+        String query = Pattern.compile("[|&]").matcher(queryString).replaceAll(" ").trim();
+
+        String url = String.format(Locale.US, URLS[7], query, pageIndex), method = METHODS[0];
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .callTimeout(1, TimeUnit.MINUTES)

@@ -59,10 +59,10 @@ public class SoundVisualizationView extends View implements MusicPlayer.OnWaveGe
             float centerY = height / 2f;
             float step = width / (float) n;
             float x = 0f;
-            float y = centerY - (waveform[0] / 64f) * (height / 2f);
+            float y = centerY * (1f - waveform[0] / 96f);
 
             for (int i = 1; i < n; i++) {
-                float newY = centerY - (waveform[i] / 64f) * (height / 2f);
+                float newY = centerY * (1f - waveform[i] / 96f);
 
                 if (i % mod == mod - 1)
                     colorIndex++;

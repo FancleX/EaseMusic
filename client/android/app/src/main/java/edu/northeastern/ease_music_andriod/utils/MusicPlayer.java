@@ -1,15 +1,18 @@
 package edu.northeastern.ease_music_andriod.utils;
 
+import android.app.Activity;
+import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.MediaDataSource;
 import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
 import android.os.Process;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jtransforms.fft.DoubleFFT_1D;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,9 +30,10 @@ public class MusicPlayer extends MediaPlayer {
     private CallbackActivity callbackActivity;
     private OnUpdateCallback onUpdateCallback;
     private OnWaveGeneratedCallback onWaveGeneratedCallback;
+    private Context rootContext;
     private final AtomicBoolean isReady = new AtomicBoolean(false);
     private Visualizer visualizer;
-
+    private Vibrator vibrator;
     private int musicIndex = -1;
     private MusicItem musicItem;
     private byte[] musicBlob;
@@ -93,6 +97,19 @@ public class MusicPlayer extends MediaPlayer {
     public void attachOnWaveGeneratedCallback(OnWaveGeneratedCallback callback) {
         this.onWaveGeneratedCallback = callback;
     }
+    public void attachRootContext(Context context) {
+        rootContext = context;
+    }
+
+    public void enableVibrator() {
+        if (vibrator != null)
+            return;
+
+        synchronized (this) {
+            if (rootContext != null)
+                vibrator = (Vibrator) rootContext.getSystemService(Context.VIBRATOR_SERVICE);
+        }
+    }
 
     public void enableVisualizer() {
         if (visualizer != null)
@@ -111,6 +128,9 @@ public class MusicPlayer extends MediaPlayer {
                 public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int i) {
                     if (onWaveGeneratedCallback != null)
                         onWaveGeneratedCallback.onWaveGenerated(bytes);
+
+                    if (rootContext != null)
+                        vibrator.vibrate(getVibrateEffect(bytes));
                 }
             }, Visualizer.getMaxCaptureRate(), false, true);
             visualizer.setEnabled(true);
@@ -237,6 +257,27 @@ public class MusicPlayer extends MediaPlayer {
                 callbackActivity.onError(errorMessage);
             }
         });
+    }
+
+    private VibrationEffect getVibrateEffect(byte[] src) {
+        int filterFactor = 16;
+        int totalAmp = 0;
+        int totalCandidates = 0;
+
+        for (byte b : src) {
+            int absByte = Math.abs(b);
+
+            if (absByte >= filterFactor) {
+                absByte = Math.min(absByte, 127);
+                totalAmp += absByte;
+                totalCandidates++;
+            }
+        }
+
+        int averageAmplitude = totalAmp / Math.max(1, totalCandidates) * 2;
+        long duration = (long) totalCandidates;
+
+        return VibrationEffect.createOneShot(Math.max(1, duration), Math.max(1, averageAmplitude));
     }
 
     public interface CallbackActivity {
