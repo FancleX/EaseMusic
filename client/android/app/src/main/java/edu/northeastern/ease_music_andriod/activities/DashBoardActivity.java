@@ -33,6 +33,17 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
         MusicPlayer musicPlayer = MusicPlayer.getInstance();
         musicPlayer.attachCallbackActivity(this);
         musicPlayer.attachRootContext(getApplicationContext());
+        musicPlayer.attachOnDownloadCompletedCallback(new MusicPlayer.OnDownloadCompletedCallback() {
+            @Override
+            public void onSuccess() {
+                runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Successfully Downloaded", Toast.LENGTH_SHORT).show());
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Failed to download: " + error, Toast.LENGTH_SHORT).show());
+            }
+        });
 
         // register top panel
         replaceTopPanelFragment(new TitleFragment());

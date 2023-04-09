@@ -1,11 +1,12 @@
 package edu.northeastern.ease_music_andriod.utils;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.MediaDataSource;
 import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
+import android.os.Environment;
 import android.os.Process;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -14,15 +15,24 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItem;
 
 public class MusicPlayer extends MediaPlayer {
 
+    @SuppressLint("StaticFieldLeak")
     private static volatile MusicPlayer instance;
     private static final String TAG = "Music Player";
     private final APIRequestGenerator requestGenerator = APIRequestGenerator.getInstance();
@@ -30,6 +40,8 @@ public class MusicPlayer extends MediaPlayer {
     private CallbackActivity callbackActivity;
     private OnUpdateCallback onUpdateCallback;
     private OnWaveGeneratedCallback onWaveGeneratedCallback;
+    private OnDownloadCompletedCallback onDownloadCompletedCallback;
+
     private Context rootContext;
     private final AtomicBoolean isReady = new AtomicBoolean(false);
     private Visualizer visualizer;
@@ -37,6 +49,10 @@ public class MusicPlayer extends MediaPlayer {
     private int musicIndex = -1;
     private MusicItem musicItem;
     private byte[] musicBlob;
+    private static final String AUDIO_DIR = "AUDIOS";
+    private final AtomicBoolean isDownloaded = new AtomicBoolean(false);
+    private boolean isFavorite;
+    private final AtomicBoolean isOnDownloading = new AtomicBoolean(false);
 
     private MusicPlayer() {
         super();
@@ -100,6 +116,9 @@ public class MusicPlayer extends MediaPlayer {
     public void attachRootContext(Context context) {
         rootContext = context;
     }
+    public void attachOnDownloadCompletedCallback(OnDownloadCompletedCallback callback) {
+        onDownloadCompletedCallback = callback;
+    }
 
     public void enableVibrator() {
         if (vibrator != null)
@@ -137,11 +156,22 @@ public class MusicPlayer extends MediaPlayer {
         }
     }
 
-    private synchronized void setMusicSource(String src) throws IOException {
+    private void setMusicSource(String src) throws IOException {
         if (musicBlob != null)
             resetPlayer();
 
         musicBlob = Base64.getDecoder().decode(src);
+        MediaDataSource dataSource = new ByteArrayMediaDataSource(musicBlob);
+        setDataSource(dataSource);
+        prepareAsync();
+    }
+
+    private void setMusicSource(byte[] src) throws IOException {
+        if (musicBlob != null)
+            resetPlayer();
+
+        musicBlob = src;
+        isDownloaded.set(true);
         MediaDataSource dataSource = new ByteArrayMediaDataSource(musicBlob);
         setDataSource(dataSource);
         prepareAsync();
@@ -157,25 +187,13 @@ public class MusicPlayer extends MediaPlayer {
             pause();
 
         isReady.set(false);
+        isDownloaded.set(false);
 
-        requestGenerator.accessResource(musicItem.getUuid(), new APIRequestGenerator.RequestCallback() {
-            @Override
-            public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
-                try {
-                    String encodedAudioFile = response.getString("data");
-
-                    setMusicSource(encodedAudioFile);
-                } catch (JSONException | IOException e) {
-                    Log.e(TAG, e.getMessage());
-                }
-            }
-
-            @Override
-            public void onError(String errorMessage, RequestAPIs.APILabel label) {
-                Log.e(TAG, label.toString() + ": " + errorMessage);
-                callbackActivity.onError(errorMessage);
-            }
-        });
+        if (hasDownloadedFile(getMusicUuid())) {
+            readFromStorage(getMusicUuid());
+        }
+        else
+            sendAccessFileRequest();
     }
 
     private void resetPlayer() {
@@ -198,28 +216,15 @@ public class MusicPlayer extends MediaPlayer {
         pause();
 
         isReady.set(false);
+        isDownloaded.set(false);
 
         if (onUpdateCallback != null)
             onUpdateCallback.onNext(musicItem.getUuid(), musicIndex);
 
-        requestGenerator.accessResource(musicItem.getUuid(), new APIRequestGenerator.RequestCallback() {
-            @Override
-            public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
-                try {
-                    String encodedAudioFile = response.getString("data");
-
-                    setMusicSource(encodedAudioFile);
-                } catch (JSONException | IOException e) {
-                    Log.e(TAG, e.getMessage());
-                }
-            }
-
-            @Override
-            public void onError(String errorMessage, RequestAPIs.APILabel label) {
-                Log.e(TAG, label.toString() + ": " + errorMessage);
-                callbackActivity.onError(errorMessage);
-            }
-        });
+        if (hasDownloadedFile(getMusicUuid()))
+            readFromStorage(getMusicUuid());
+        else
+            sendAccessFileRequest();
     }
 
     public void playLastMusic() {
@@ -235,28 +240,70 @@ public class MusicPlayer extends MediaPlayer {
         pause();
 
         isReady.set(false);
+        isDownloaded.set(false);
 
         if (onUpdateCallback != null)
             onUpdateCallback.onLast(musicItem.getUuid(), musicIndex);
 
-        requestGenerator.accessResource(musicItem.getUuid(), new APIRequestGenerator.RequestCallback() {
-            @Override
-            public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
-                try {
-                    String encodedAudioFile = response.getString("data");
+        if (hasDownloadedFile(getMusicUuid()))
+            readFromStorage(getMusicUuid());
+        else
+            sendAccessFileRequest();
+    }
 
-                    setMusicSource(encodedAudioFile);
-                } catch (JSONException | IOException e) {
-                    Log.e(TAG, e.getMessage());
+    private void sendAccessFileRequest() {
+            requestGenerator.accessResource(musicItem.getUuid(), new APIRequestGenerator.RequestCallback() {
+                @Override
+                public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
+                    try {
+                        String encodedAudioFile = response.getString("data");
+
+                        setMusicSource(encodedAudioFile);
+                    } catch (JSONException | IOException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
                 }
-            }
 
-            @Override
-            public void onError(String errorMessage, RequestAPIs.APILabel label) {
-                Log.e(TAG, label.toString() + ": " + errorMessage);
-                callbackActivity.onError(errorMessage);
+                @Override
+                public void onError(String errorMessage, RequestAPIs.APILabel label) {
+                    Log.e(TAG, label.toString() + ": " + errorMessage);
+                    callbackActivity.onError(errorMessage);
+                }
+            });
+    }
+    private void readFromStorage(String filename) {
+        File dir = new File(rootContext.getExternalFilesDir(null), AUDIO_DIR);
+        File file = new File(dir, String.format("%s.mp3", filename));
+
+        try {
+            setMusicSource(readAllBytes(file));
+        } catch (IOException e) {
+            Log.i(TAG, e.getMessage());
+            sendAccessFileRequest();
+        }
+    }
+
+    private byte[] readAllBytes(File file) throws IOException {
+        Log.i(TAG, "Read music from: " + file);
+
+        try (FileInputStream fis = new FileInputStream(file);
+             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                bos.write(buffer, 0, bytesRead);
             }
-        });
+            return bos.toByteArray();
+        }
+    }
+
+    private boolean hasDownloadedFile(String filename) {
+        File dir = new File(rootContext.getExternalFilesDir(null), AUDIO_DIR);
+        if (!dir.exists())
+            return false;
+
+        File file = new File(dir, String.format("%s.mp3", filename));
+        return file.exists();
     }
 
     private VibrationEffect getVibrateEffect(byte[] src) {
@@ -280,6 +327,50 @@ public class MusicPlayer extends MediaPlayer {
         return VibrationEffect.createOneShot(Math.max(1, duration), Math.max(1, averageAmplitude));
     }
 
+    public void downloadMusic() {
+        if (isOnDownloading.get() || isDownloaded.get())
+            return;
+
+        File dir = new File(rootContext.getExternalFilesDir(null), AUDIO_DIR);
+        if (!dir.exists())
+            dir.mkdir();
+
+        File file = new File(dir, String.format("%s.mp3", getMusicUuid()));
+
+        Runnable runnable = () -> {
+            isOnDownloading.set(true);
+            try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+                fileOutputStream.write(musicBlob);
+
+                isDownloaded.set(true);
+                if (onDownloadCompletedCallback != null)
+                    onDownloadCompletedCallback.onSuccess();
+            } catch (IOException e) {
+                Log.i(TAG, e.getMessage());
+                isDownloaded.set(false);
+                if (onDownloadCompletedCallback != null)
+                    onDownloadCompletedCallback.onError(e.getMessage());
+            } finally {
+                isOnDownloading.set(false);
+            }
+        };
+
+        new Thread(runnable).start();
+    }
+
+    public void addToFavorite() {
+
+
+    }
+
+    public boolean isDownloaded() {
+        return isDownloaded.get();
+    }
+
+    public boolean isFavorite() {
+        return false;
+    }
+
     public interface CallbackActivity {
         void onError(String error);
     }
@@ -291,5 +382,9 @@ public class MusicPlayer extends MediaPlayer {
 
     public interface OnWaveGeneratedCallback {
         void onWaveGenerated(byte[] waves);
+    }
+    public interface OnDownloadCompletedCallback {
+        void onSuccess();
+        void onError(String error);
     }
 }

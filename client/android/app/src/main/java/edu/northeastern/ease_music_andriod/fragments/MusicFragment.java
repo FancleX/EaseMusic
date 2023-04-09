@@ -2,14 +2,14 @@ package edu.northeastern.ease_music_andriod.fragments;
 
 import android.Manifest;
 import android.animation.ObjectAnimator;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -42,7 +43,6 @@ public class MusicFragment extends Fragment {
     private static final String TAG = "Music Fragment";
     private final UIUpdater uiUpdater = new UIUpdater();
     private String currentMusicId = "";
-    private ActivityResultLauncher<String[]> requestPermissionLauncher;
 
     // ================ views ================
     private TextView title, author;
@@ -99,7 +99,7 @@ public class MusicFragment extends Fragment {
         coverAnimator.setRepeatMode(ObjectAnimator.RESTART);
 
         // request permissions
-        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), results -> {
+        ActivityResultLauncher<String[]> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), results -> {
             for (Map.Entry<String, Boolean> result : results.entrySet()) {
                 if (result.getKey().equals(Manifest.permission.RECORD_AUDIO))
                     renderVisualizer(root);
@@ -119,12 +119,13 @@ public class MusicFragment extends Fragment {
         else
             musicPlayer.enableVibrator();
 
-        requestPermissionLauncher.launch(permissions.toArray(new String[0]));
+        if (!permissions.isEmpty())
+            requestPermissionLauncher.launch(permissions.toArray(new String[0]));
 
         // add callbacks
-        shareIcon.setOnClickListener(view -> {});
-        addFavoriteIcon.setOnClickListener(view -> {});
-        downloadIcon.setOnClickListener(view -> {});
+        shareIcon.setOnClickListener(view -> shareMusic());
+        addFavoriteIcon.setOnClickListener(view -> musicPlayer.addToFavorite());
+        downloadIcon.setOnClickListener(view -> musicPlayer.downloadMusic());
         previousIcon.setOnClickListener(view -> musicPlayer.playLastMusic());
         playIcon.setOnClickListener(view -> {
             if (musicPlayer.isPlaying())
@@ -156,6 +157,15 @@ public class MusicFragment extends Fragment {
         return root;
     }
 
+    private void shareMusic() {
+        ClipboardManager clipboard = (ClipboardManager) requireActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+        String text = String.format("%s by %s (https://youtu.be/%s)", musicPlayer.getMusicName(), musicPlayer.getMusicAuthor(), musicPlayer.getMusicUuid());
+        ClipData clip = ClipData.newPlainText("Ease Music", text);
+        clipboard.setPrimaryClip(clip);
+
+        Toast.makeText(getContext(), "Share link has copied to your clipboard", Toast.LENGTH_SHORT).show();
+    }
+
     private String formatPlayTime(int length) {
         return String.format(Locale.US,
                 "%02d:%02d",
@@ -170,6 +180,26 @@ public class MusicFragment extends Fragment {
         musicPlayer.attachOnWaveGeneratedCallback(visualizationView);
     }
 
+    private void disableIconsClick() {
+        shareIcon.setClickable(false);
+        addFavoriteIcon.setClickable(false);
+        downloadIcon.setClickable(false);
+
+        playIcon.setClickable(false);
+        previousIcon.setClickable(false);
+        nextIcon.setClickable(false);
+    }
+
+    private void enableIconsClick() {
+        shareIcon.setClickable(true);
+        addFavoriteIcon.setClickable(true);
+        downloadIcon.setClickable(true);
+
+        playIcon.setClickable(true);
+        previousIcon.setClickable(true);
+        nextIcon.setClickable(true);
+    }
+
     private class UIUpdater implements Runnable {
         @Override
         public void run() {
@@ -180,6 +210,17 @@ public class MusicFragment extends Fragment {
                 progressIndicator.setVisibility(View.INVISIBLE);
                 seekBar.setMax(musicPlayer.getDuration());
                 totalTime.setText(formatPlayTime(musicPlayer.getDuration()));
+                enableIconsClick();
+
+                if (musicPlayer.isDownloaded()) {
+                    downloadIcon.setImageResource(R.drawable.download_done_24);
+                    downloadIcon.setClickable(false);
+                }
+
+                if (musicPlayer.isFavorite()) {
+                    addFavoriteIcon.setImageResource(R.drawable.playlist_remove_24);
+                    addFavoriteIcon.setClickable(false);
+                }
 
                 if (musicPlayer.isPlaying()) {
 
@@ -222,6 +263,10 @@ public class MusicFragment extends Fragment {
                 albumAnimator.pause();
 
                 playIcon.setImageResource(R.drawable.play_circle_outline_64);
+                downloadIcon.setImageResource(R.drawable.download_icon_24);
+                addFavoriteIcon.setImageResource(R.drawable.playlist_add_check_24);
+                disableIconsClick();
+
                 progressIndicator.setVisibility(View.VISIBLE);
             }
 

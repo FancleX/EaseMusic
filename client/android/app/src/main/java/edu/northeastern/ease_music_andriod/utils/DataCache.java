@@ -1,6 +1,8 @@
 package edu.northeastern.ease_music_andriod.utils;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItem;
 
@@ -9,9 +11,11 @@ public class DataCache {
     private static volatile DataCache instance;
 
     private final SearchCache<MusicItem> searchCache;
+    private final UserCache userCache;
 
     private DataCache() {
         this.searchCache = new SearchCache<>();
+        this.userCache = new UserCache();
     }
 
     public static DataCache getInstance() {
@@ -24,6 +28,9 @@ public class DataCache {
 
     public SearchCache<MusicItem> getSearchCache() {
         return searchCache;
+    }
+    public UserCache getUserCache() {
+        return userCache;
     }
 
 
@@ -81,4 +88,40 @@ public class DataCache {
         }
     }
 
+    public static class UserCache {
+        private String token;
+        private String username;
+        private List<String> favorites;
+        private AtomicBoolean isLogin = new AtomicBoolean(false);
+
+        public UserCache() {}
+
+        public String getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public List<String> getFavorites() {
+            return favorites;
+        }
+
+        public void setFavorites(List<String> favorites) {
+            this.favorites = favorites;
+        }
+
+        public boolean isUserLogin() {
+            return isLogin.get();
+        }
+    }
 }
