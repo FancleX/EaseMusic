@@ -11,9 +11,12 @@ import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Handler;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -22,6 +25,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -31,7 +35,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import edu.northeastern.ease_music_andriod.R;
+import edu.northeastern.ease_music_andriod.utils.DataCache;
 import edu.northeastern.ease_music_andriod.utils.MusicPlayer;
+import edu.northeastern.ease_music_andriod.utils.UserService;
 import edu.northeastern.ease_music_andriod.views.SoundVisualizationView;
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
@@ -124,7 +130,13 @@ public class MusicFragment extends Fragment {
 
         // add callbacks
         shareIcon.setOnClickListener(view -> shareMusic());
-        addFavoriteIcon.setOnClickListener(view -> musicPlayer.addToFavorite());
+        addFavoriteIcon.setOnClickListener(view -> {
+            if (!DataCache.getInstance().getUserCache().isUserLogin()) {
+                toggleLoginFragment();
+            } else {
+                UserService.getInstance().addToFavorite(musicPlayer.getMusicUuid());
+            }
+        });
         downloadIcon.setOnClickListener(view -> musicPlayer.downloadMusic());
         previousIcon.setOnClickListener(view -> musicPlayer.playLastMusic());
         playIcon.setOnClickListener(view -> {
@@ -173,7 +185,6 @@ public class MusicFragment extends Fragment {
                 TimeUnit.MILLISECONDS.toSeconds(length) % TimeUnit.MINUTES.toSeconds(1));
     }
 
-
     private void renderVisualizer(View root) {
         visualizationView = root.findViewById(R.id.player_sound_visualization);
         musicPlayer.enableVisualizer();
@@ -200,9 +211,32 @@ public class MusicFragment extends Fragment {
         nextIcon.setClickable(true);
     }
 
+    private void toggleLoginFragment() {
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+
+        BottomNavigationView navigationView = requireActivity().findViewById(R.id.bottom_navigation);
+        MenuItem item = navigationView.getMenu().findItem(R.id.home);
+        item.setChecked(true);
+
+        fragmentTransaction.replace(R.id.frame_layout, new LoginFragment());
+        fragmentTransaction.commit();
+    }
+
     private class UIUpdater implements Runnable {
         @Override
         public void run() {
+            if (musicPlayer.isDownloaded()) {
+                downloadIcon.setImageResource(R.drawable.download_done_24);
+                downloadIcon.setClickable(false);
+            }
+
+            if (UserService.getInstance().checkFavoriteById(musicPlayer.getMusicUuid())) {
+                addFavoriteIcon.setImageResource(R.drawable.playlist_remove_24);
+                addFavoriteIcon.setClickable(false);
+            }
+
             if (musicPlayer.isReady()) {
                 int position = musicPlayer.getCurrentPosition();
                 seekBar.setProgress(position);
@@ -211,16 +245,6 @@ public class MusicFragment extends Fragment {
                 seekBar.setMax(musicPlayer.getDuration());
                 totalTime.setText(formatPlayTime(musicPlayer.getDuration()));
                 enableIconsClick();
-
-                if (musicPlayer.isDownloaded()) {
-                    downloadIcon.setImageResource(R.drawable.download_done_24);
-                    downloadIcon.setClickable(false);
-                }
-
-                if (musicPlayer.isFavorite()) {
-                    addFavoriteIcon.setImageResource(R.drawable.playlist_remove_24);
-                    addFavoriteIcon.setClickable(false);
-                }
 
                 if (musicPlayer.isPlaying()) {
 
@@ -270,7 +294,7 @@ public class MusicFragment extends Fragment {
                 progressIndicator.setVisibility(View.VISIBLE);
             }
 
-            handler.postDelayed(this, 200);
+            handler.postDelayed(this, 100);
         }
     }
 

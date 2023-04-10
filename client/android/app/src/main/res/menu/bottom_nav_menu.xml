@@ -10,7 +10,7 @@
         android:id="@+id/music"
         android:icon="@drawable/music_icon_24"/>
 
-    <item android:title="Login"
-        android:id="@+id/login"
+    <item android:title="Home"
+        android:id="@+id/home"
         android:icon="@drawable/login_icon_24"/>
 </menu>

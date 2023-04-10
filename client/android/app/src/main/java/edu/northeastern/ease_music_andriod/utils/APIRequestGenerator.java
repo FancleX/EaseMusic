@@ -15,8 +15,12 @@ import java.util.regex.Pattern;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class APIRequestGenerator implements RequestAPIs {
@@ -28,8 +32,8 @@ public class APIRequestGenerator implements RequestAPIs {
             "http://100.25.191.181:9000/api/v1/user/update/username",
             "http://100.25.191.181:9000/api/v1/user/update/password",
             "http://100.25.191.181:9000/api/v1/user/get/favorites?index=%d&limit=%d",
-            "http://100.25.191.181:9000/api/v1/user/user/add/favorites",
-            "http://100.25.191.181:9000/api/v1/user/user/delete/favorites",
+            "http://100.25.191.181:9000/api/v1/user/add/favorites",
+            "http://100.25.191.181:9000/api/v1/user/delete/favorites",
             "http://100.25.191.181:9000/api/v1/search/results?search_query=%s&page_index=%d",
             "http://100.25.191.181:9000/api/v1/search/detail?uuid=%s"
     };
@@ -78,11 +82,121 @@ public class APIRequestGenerator implements RequestAPIs {
     @Override
     public void getFavorites(String token, int index, int limit, RequestCallback callback) {
         String url = String.format(Locale.US, URLS[4], index, limit), method = METHODS[0];
+
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .callTimeout(1, TimeUnit.MINUTES)
+                .readTimeout(1, TimeUnit.MINUTES)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .method(method, null)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, e.getMessage());
+
+                callback.onError(e.getMessage(), APILabel.GET_FAVORITES);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.body() != null) {
+                    try {
+                        String responseString = response.body().string();
+
+                        if (response.code() == 200) {
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("data", jsonObject);
+
+                            Log.i(TAG, jsonObject.toString());
+                            callback.onSuccess(jsonObject, APILabel.GET_FAVORITES);
+                        } else if (response.code() >= 400 && response.code() < 500) {
+                            Log.e(TAG, String.format("Code: %d, error: %s", response.code(), responseString));
+                            JSONObject jsonObject = new JSONObject(responseString);
+                            callback.onError(jsonObject.getString("message"), APILabel.GET_FAVORITES);
+                        } else {
+                            Log.e(TAG, response.toString());
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                    return;
+                }
+
+                callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.GET_FAVORITES);
+            }
+        });
     }
 
     @Override
     public void addFavorites(String token, String uuid, int currentIndex, int limit, RequestCallback callback) {
         String url = URLS[5], method = METHODS[2];
+
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .callTimeout(1, TimeUnit.MINUTES)
+                .readTimeout(1, TimeUnit.MINUTES)
+                .build();
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("uuid", uuid);
+            jsonObject.put("currentIndex", String.valueOf(currentIndex));
+            jsonObject.put("limit", String.valueOf(limit));
+        } catch (JSONException ignored) {}
+
+        RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json"));
+
+        Request request = new Request.Builder()
+                .url(url)
+                .method(method, requestBody)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, e.getMessage());
+
+                callback.onError(e.getMessage(), APILabel.ADD_FAVORITES);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.body() != null) {
+                    try {
+                        String responseString = response.body().string();
+
+                        if (responseString.isEmpty()) {
+                            callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.ADD_FAVORITES);
+                            return;
+                        }
+
+                        if (response.code() == 200) {
+                            JSONObject jsonObject = new JSONObject(responseString);
+
+                            Log.i(TAG, jsonObject.toString());
+                            callback.onSuccess(jsonObject, APILabel.ADD_FAVORITES);
+                        } else if (response.code() >= 400 && response.code() < 500) {
+                            Log.e(TAG, String.format("Code: %d, error: %s", response.code(), responseString));
+                            JSONObject jsonObject = new JSONObject(responseString);
+                            callback.onError(jsonObject.getString("message"), APILabel.ADD_FAVORITES);
+                        } else {
+                            Log.e(TAG, response.toString());
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, e.getMessage());
+                    }
+                    return;
+                }
+
+                callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.ADD_FAVORITES);
+            }
+        });
     }
 
     @Override
@@ -119,15 +233,23 @@ public class APIRequestGenerator implements RequestAPIs {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.body() != null) {
                     try {
+                        String responseString = response.body().string();
+
+                        if (responseString.isEmpty()) {
+                            callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.ADD_FAVORITES);
+                            return;
+                        }
+
                         if (response.code() == 200) {
-                            JSONArray jsonArray = new JSONArray(response.body().string());
+                            JSONArray jsonArray = new JSONArray(responseString);
                             JSONObject jsonObject = new JSONObject();
                             jsonObject.put("data", jsonArray);
 
-                            Log.i("API Request Generator", jsonObject.toString());
+                            Log.i(TAG, jsonObject.toString());
                             callback.onSuccess(jsonObject, APILabel.SEARCH_CONTENT);
                         } else if (response.code() >= 400 && response.code() < 500) {
-                            JSONObject jsonObject = new JSONObject(response.body().string());
+                            Log.e(TAG, String.format("Code: %d, error: %s", response.code(), responseString));
+                            JSONObject jsonObject = new JSONObject(responseString);
                             callback.onError(jsonObject.getString("message"), APILabel.SEARCH_CONTENT);
                         } else {
                             Log.e(TAG, response.toString());
@@ -171,13 +293,20 @@ public class APIRequestGenerator implements RequestAPIs {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.body() != null) {
                     try {
-                        if (response.code() == 200) {
-                            JSONObject jsonObject = new JSONObject(response.body().string());
+                        String responseString = response.body().string();
 
-                            Log.i("API Request Generator", jsonObject.toString());
+                        if (responseString.isEmpty()) {
+                            callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.ADD_FAVORITES);
+                            return;
+                        }
+
+                        if (response.code() == 200) {
+                            JSONObject jsonObject = new JSONObject(responseString);
+
+                            Log.i(TAG, jsonObject.toString());
                             callback.onSuccess(jsonObject, APILabel.ACCESS_RESOURCE);
                         } else if (response.code() >= 400 && response.code() < 500) {
-                            JSONObject jsonObject = new JSONObject(response.body().string());
+                            JSONObject jsonObject = new JSONObject(responseString);
                             callback.onError(jsonObject.getString("message"), APILabel.ACCESS_RESOURCE);
                         } else {
                             Log.e(TAG, response.toString());

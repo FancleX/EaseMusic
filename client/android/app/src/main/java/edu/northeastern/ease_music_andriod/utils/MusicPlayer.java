@@ -12,6 +12,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,12 +48,12 @@ public class MusicPlayer extends MediaPlayer {
     private Visualizer visualizer;
     private Vibrator vibrator;
     private int musicIndex = -1;
-    private MusicItem musicItem;
+    private volatile MusicItem musicItem;
     private byte[] musicBlob;
     private static final String AUDIO_DIR = "AUDIOS";
     private final AtomicBoolean isDownloaded = new AtomicBoolean(false);
-    private boolean isFavorite;
     private final AtomicBoolean isOnDownloading = new AtomicBoolean(false);
+    private final AtomicBoolean isFavorite = new AtomicBoolean(false);
 
     private MusicPlayer() {
         super();
@@ -267,7 +268,8 @@ public class MusicPlayer extends MediaPlayer {
                 @Override
                 public void onError(String errorMessage, RequestAPIs.APILabel label) {
                     Log.e(TAG, label.toString() + ": " + errorMessage);
-                    callbackActivity.onError(errorMessage);
+                    if (callbackActivity != null)
+                        callbackActivity.onError(errorMessage);
                 }
             });
     }
@@ -358,18 +360,10 @@ public class MusicPlayer extends MediaPlayer {
         new Thread(runnable).start();
     }
 
-    public void addToFavorite() {
-
-
-    }
-
     public boolean isDownloaded() {
         return isDownloaded.get();
     }
 
-    public boolean isFavorite() {
-        return false;
-    }
 
     public interface CallbackActivity {
         void onError(String error);

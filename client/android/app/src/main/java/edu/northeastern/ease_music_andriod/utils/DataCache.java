@@ -1,8 +1,16 @@
 package edu.northeastern.ease_music_andriod.utils;
 
+import android.util.Log;
+
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItem;
 
@@ -89,12 +97,16 @@ public class DataCache {
     }
 
     public static class UserCache {
-        private String token;
+        private String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmYW5jbGVAZ21haWwuY29tIiwiaWF0IjoxNjgxMDc5NjIzLCJleHAiOjE2ODExNjYwMjN9.jBjupD4MPLsanfycCE3WVfZeUELzc8Vl2ihLJ8puicE";
         private String username;
-        private List<String> favorites;
-        private AtomicBoolean isLogin = new AtomicBoolean(false);
+        private final Map<Integer, List<MusicItem>> favoritesMap;
+        private final AtomicBoolean isLogin = new AtomicBoolean(true);
+        private int currentFavoritesIndex = 0;
+        private boolean hasNoMoreData;
 
-        public UserCache() {}
+        public UserCache() {
+            this.favoritesMap = new TreeMap<>();
+        }
 
         public String getToken() {
             return token;
@@ -112,12 +124,29 @@ public class DataCache {
             this.username = username;
         }
 
-        public List<String> getFavorites() {
-            return favorites;
+        public List<MusicItem> getFavorites() {
+            final List<MusicItem> list = new ArrayList<>();
+            favoritesMap.values().forEach(list::addAll);
+
+            return list;
         }
 
-        public void setFavorites(List<String> favorites) {
-            this.favorites = favorites;
+        public void setFavorites(List<MusicItem> favorites, int index) {
+            if (favorites.isEmpty()) {
+                hasNoMoreData = true;
+                return;
+            }
+
+            favoritesMap.put(index, favorites);
+            Log.i("Data cache", favoritesMap.toString());
+        }
+
+        public int getCurrentFavoritesIndex() {
+            return currentFavoritesIndex;
+        }
+
+        public void setCurrentFavoritesIndex(int currentFavoritesIndex) {
+            this.currentFavoritesIndex = currentFavoritesIndex;
         }
 
         public boolean isUserLogin() {
