@@ -134,7 +134,14 @@ public class MusicFragment extends Fragment {
             if (!DataCache.getInstance().getUserCache().isUserLogin()) {
                 toggleLoginFragment();
             } else {
-                UserService.getInstance().addToFavorite(musicPlayer.getMusicUuid());
+                DataCache.UserCache userCache = DataCache.getInstance().getUserCache();
+                UserService userService = UserService.getInstance();
+                String musicUuid = musicPlayer.getMusicUuid();
+                if (userCache.checkFavoriteById(musicUuid)) {
+                    userService.removeFavorites(musicUuid);
+                } else {
+                    userService.addToFavorite(musicUuid);
+                }
             }
         });
         downloadIcon.setOnClickListener(view -> musicPlayer.downloadMusic());
@@ -232,9 +239,10 @@ public class MusicFragment extends Fragment {
                 downloadIcon.setClickable(false);
             }
 
-            if (UserService.getInstance().checkFavoriteById(musicPlayer.getMusicUuid())) {
+            if (DataCache.getInstance().getUserCache().checkFavoriteById(musicPlayer.getMusicUuid())) {
                 addFavoriteIcon.setImageResource(R.drawable.playlist_remove_24);
-                addFavoriteIcon.setClickable(false);
+            } else {
+                addFavoriteIcon.setImageResource(R.drawable.playlist_add_check_24);
             }
 
             if (musicPlayer.isReady()) {

@@ -141,6 +141,25 @@ public class DataCache {
             Log.i("Data cache", favoritesMap.toString());
         }
 
+        public int queryIndexById(String uuid) {
+            for (Map.Entry<Integer, List<MusicItem>> entry : favoritesMap.entrySet()) {
+                List<MusicItem> musicItems = entry.getValue();
+
+                boolean anyMatch = musicItems.stream().anyMatch(item -> item.getUuid().equals(uuid));
+
+                if (anyMatch)
+                    return entry.getKey();
+            }
+
+            return -1;
+        }
+
+        public boolean checkFavoriteById(String uuid) {
+            List<MusicItem> favorites = getFavorites();
+
+            return favorites.stream().anyMatch(musicItem -> musicItem.getUuid().equals(uuid));
+        }
+
         public int getCurrentFavoritesIndex() {
             return currentFavoritesIndex;
         }

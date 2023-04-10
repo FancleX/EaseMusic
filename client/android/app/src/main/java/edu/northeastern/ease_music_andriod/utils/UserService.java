@@ -89,16 +89,60 @@ public class UserService {
                     }
                 });
     }
-    public void removeFavorites(String uuid) {}
+
+    public void removeFavorites(String uuid) {
+        DataCache.UserCache userCache = dataCache.getUserCache();
+        int index = userCache.queryIndexById(uuid);
+
+        requestGenerator.removeFavorites(
+                dataCache.getUserCache().getToken(),
+                uuid,
+                userCache.getCurrentFavoritesIndex(),
+                5,
+                new APIRequestGenerator.RequestCallback() {
+                    @Override
+                    public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
+                        try {
+                            JSONArray favoriteList = response.getJSONArray("favorites");
+
+                            List<MusicItem> favorites = new ArrayList<>();
+                            for (int i = 0; i < favoriteList.length(); i++) {
+                                JSONObject favoriteItem = favoriteList.getJSONObject(i);
+
+                                String uuid = favoriteItem.getString("uuid");
+                                String title = favoriteItem.getString("title");
+                                String author = favoriteItem.getString("author");
+                                String description = favoriteItem.getString("description");
+                                String thumbnail = favoriteItem.getString("thumbnail");
+
+                                favorites.add(new MusicItem(
+                                        uuid,
+                                        title,
+                                        author,
+                                        description,
+                                        thumbnail
+                                ));
+                            }
+
+                            userCache.setFavorites(favorites, index);
+                            if (onRequestResultListener != null)
+                                onRequestResultListener.onSuccess(OnRequestResultListener.EventType.REMOVE);
+
+                        } catch (JSONException e) {
+                            Log.e(TAG, e.getMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onError(String errorMessage, RequestAPIs.APILabel label) {
+                        Log.e(TAG, label.toString() + ": " + errorMessage);
+                        if (onRequestResultListener != null)
+                            onRequestResultListener.onError(errorMessage, OnRequestResultListener.EventType.REMOVE);
+                    }
+                });
+    }
     public void loadMoreFavorites() {
 
-    }
-
-
-    public boolean checkFavoriteById(String uuid) {
-        List<MusicItem> favorites = dataCache.getUserCache().getFavorites();
-
-        return favorites.stream().anyMatch(musicItem -> musicItem.getUuid().equals(uuid));
     }
 
     public interface OnRequestResultListener {

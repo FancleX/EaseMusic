@@ -202,6 +202,69 @@ public class APIRequestGenerator implements RequestAPIs {
     @Override
     public void removeFavorites(String token, String uuid, int currentIndex, int limit, RequestCallback callback) {
         String url = URLS[6], method = METHODS[2];
+
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .callTimeout(1, TimeUnit.MINUTES)
+                .readTimeout(1, TimeUnit.MINUTES)
+                .build();
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("uuid", uuid);
+            jsonObject.put("currentIndex", String.valueOf(currentIndex));
+            jsonObject.put("limit", String.valueOf(limit));
+        } catch (JSONException ignored) {}
+
+        RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json"));
+
+        Request request = new Request.Builder()
+                .url(url)
+                .method(method, requestBody)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, e.getMessage());
+
+                callback.onError(e.getMessage(), APILabel.REMOVE_FAVORITES);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.body() != null) {
+                    try {
+                        String responseString = response.body().string();
+
+                        if (responseString.isEmpty()) {
+                            callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.REMOVE_FAVORITES);
+                            return;
+                        }
+
+                        if (response.code() == 200) {
+                            JSONObject jsonObject = new JSONObject(responseString);
+
+                            Log.i(TAG, jsonObject.toString());
+                            callback.onSuccess(jsonObject, APILabel.REMOVE_FAVORITES);
+                        } else if (response.code() >= 400 && response.code() < 500) {
+                            Log.e(TAG, String.format("Code: %d, error: %s", response.code(), responseString));
+                            JSONObject jsonObject = new JSONObject(responseString);
+                            callback.onError(jsonObject.getString("message"), APILabel.REMOVE_FAVORITES);
+                        } else {
+                            Log.e(TAG, response.toString());
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, e.getMessage());
+                    }
+                    return;
+                }
+
+                callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.REMOVE_FAVORITES);
+            }
+        });
     }
 
     @Override
