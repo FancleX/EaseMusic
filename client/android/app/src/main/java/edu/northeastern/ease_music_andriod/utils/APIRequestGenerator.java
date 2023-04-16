@@ -239,6 +239,66 @@ public class APIRequestGenerator implements RequestAPIs {
     @Override
     public void updatePassword(String token, String newPassword, String oldPassword, RequestCallback callback) {
         String url = URLS[3], method = METHODS[2];
+
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .callTimeout(1, TimeUnit.MINUTES)
+                .readTimeout(1, TimeUnit.MINUTES)
+                .build();
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("new_password", newPassword);
+            jsonObject.put("old_password", oldPassword);
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+            callback.onError(e.getMessage(), APILabel.UPDATE_PASSWORD);
+            return;
+        }
+
+        RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json"));
+
+        Request request = new Request.Builder()
+                .url(url)
+                .method(method, requestBody)
+                .header("Authorization", "Bearer " + token)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, e.getMessage());
+                callback.onError(e.getMessage(), APILabel.UPDATE_PASSWORD);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.body() != null) {
+                    try {
+                        String responseString = response.body().string();
+
+                        if (response.code() == 200) {
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("message", "Password updated successfully");
+
+                            Log.i(TAG, jsonObject.toString());
+                            callback.onSuccess(jsonObject, APILabel.UPDATE_PASSWORD);
+                        } else if (response.code() >= 400 && response.code() < 500) {
+                            Log.e(TAG, String.format("Code: %d, error: %s", response.code(), responseString));
+                            JSONObject jsonObject = new JSONObject(responseString);
+                            callback.onError(jsonObject.getString("message"), APILabel.UPDATE_PASSWORD);
+                        } else {
+                            Log.e(TAG, response.toString());
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                    return;
+                }
+
+                callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.UPDATE_PASSWORD);
+            }
+        });
+
     }
 
     @Override
