@@ -61,17 +61,179 @@ public class APIRequestGenerator implements RequestAPIs {
     public void signIn(String email, String password, RequestCallback callback) {
         String url = URLS[0], method = METHODS[1];
 
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .callTimeout(1, TimeUnit.MINUTES)
+                .readTimeout(1, TimeUnit.MINUTES)
+                .build();
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("email", email);
+            jsonObject.put("password", password);
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        RequestBody requestBody = RequestBody.create(jsonObject.toString(),MediaType.parse("application/json"));
+
+        Request request = new Request.Builder()
+                .url(url)
+                .method(method, requestBody)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, e.getMessage());
+
+                callback.onError(e.getMessage(), APILabel.SIGNIN);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.body() != null) {
+                    try {
+                        String responseString = response.body().string();
+
+                        if (response.code() == 200) {
+                            JSONObject jsonObject = new JSONObject(responseString);
+                            String token = jsonObject.getString("token");
+
+                            Log.i(TAG, "Token: " + token);
+                            callback.onSuccess(jsonObject, APILabel.SIGNIN);
+                        } else if (response.code() >= 400 && response.code() < 500) {
+                            Log.e(TAG, String.format("Code: %d, error: %s", response.code(), responseString));
+                            JSONObject jsonObject = new JSONObject(responseString);
+                            callback.onError(jsonObject.getString("message"), APILabel.SIGNIN);
+                        } else {
+                            Log.e(TAG, response.toString());
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                    return;
+                }
+
+                callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.SIGNIN);
+            }
+        });
+
     }
 
     @Override
     public void signUp(String email, String username, String password, RequestCallback callback) {
         String url = URLS[1], method = METHODS[1];
 
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .callTimeout(1, TimeUnit.MINUTES)
+                .readTimeout(1, TimeUnit.MINUTES)
+                .build();
+
+        MediaType mediaType = MediaType.parse("application/json");
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("email", email);
+            jsonObject.put("username", username);
+            jsonObject.put("password", password);
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+            callback.onError(e.getMessage(), APILabel.SIGNUP);
+            return;
+        }
+
+        RequestBody requestBody = RequestBody.create(jsonObject.toString(), mediaType);
+        Request request = new Request.Builder()
+                .url(url)
+                .method(method, requestBody)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, e.getMessage());
+                callback.onError(e.getMessage(), APILabel.SIGNUP);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.body() != null) {
+                    try {
+                        String responseString = response.body().string();
+
+                        if (response.code() == 200) {
+                            JSONObject jsonObject = new JSONObject(responseString);
+                            callback.onSuccess(jsonObject, APILabel.SIGNUP);
+                        } else if (response.code() >= 400 && response.code() < 500) {
+                            Log.e(TAG, String.format("Code: %d, error: %s", response.code(), responseString));
+                            JSONObject jsonObject = new JSONObject(responseString);
+                            callback.onError(jsonObject.getString("message"), APILabel.SIGNUP);
+                        } else {
+                            Log.e(TAG, response.toString());
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                        callback.onError(e.getMessage(), APILabel.SIGNUP);
+                    }
+                    return;
+                }
+
+                callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.SIGNUP);
+            }
+        });
     }
 
     @Override
     public void updateUsername(String token, String username, RequestCallback callback) {
         String url = URLS[2], method = METHODS[2];
+
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .callTimeout(1, TimeUnit.MINUTES)
+                .readTimeout(1, TimeUnit.MINUTES)
+                .build();
+
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody requestBody = RequestBody.create(mediaType, "{\"username\": \"" + username + "\"}");
+
+        Request request = new Request.Builder()
+                .url(url)
+                .method(method, requestBody)
+                .addHeader("Authorization", "Bearer " + token)
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, e.getMessage());
+                callback.onError(e.getMessage(), APILabel.UPDATE_USERNAME);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.body() != null) {
+                    try {
+                        String responseString = response.body().string();
+                        if (response.code() == 200) {
+                            JSONObject jsonObject = new JSONObject(responseString);
+                            Log.i(TAG, jsonObject.toString());
+                            callback.onSuccess(jsonObject, APILabel.UPDATE_USERNAME);
+                        } else if (response.code() >= 400 && response.code() < 500) {
+                            Log.e(TAG, String.format("Code: %d, error: %s", response.code(), responseString));
+                            JSONObject jsonObject = new JSONObject(responseString);
+                            callback.onError(jsonObject.getString("message"), APILabel.UPDATE_USERNAME);
+                        } else {
+                            Log.e(TAG, response.toString());
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                    return;
+                }
+
+                callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.UPDATE_USERNAME);
+            }
+        });
     }
 
     @Override
