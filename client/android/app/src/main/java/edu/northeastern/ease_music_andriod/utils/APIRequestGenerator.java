@@ -193,11 +193,11 @@ public class APIRequestGenerator implements RequestAPIs {
                 .build();
 
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody requestBody = RequestBody.create(mediaType, "{\"username\": \"" + username + "\"}");
+        RequestBody body = RequestBody.create(mediaType, "{\"username\": \"" + username + "\"}");
 
         Request request = new Request.Builder()
                 .url(url)
-                .method(method, requestBody)
+                .method(method, body)
                 .addHeader("Authorization", "Bearer " + token)
                 .addHeader("Content-Type", "application/json")
                 .build();
@@ -206,6 +206,7 @@ public class APIRequestGenerator implements RequestAPIs {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.e(TAG, e.getMessage());
+
                 callback.onError(e.getMessage(), APILabel.UPDATE_USERNAME);
             }
 
@@ -214,9 +215,9 @@ public class APIRequestGenerator implements RequestAPIs {
                 if (response.body() != null) {
                     try {
                         String responseString = response.body().string();
+
                         if (response.code() == 200) {
                             JSONObject jsonObject = new JSONObject(responseString);
-                            Log.i(TAG, jsonObject.toString());
                             callback.onSuccess(jsonObject, APILabel.UPDATE_USERNAME);
                         } else if (response.code() >= 400 && response.code() < 500) {
                             Log.e(TAG, String.format("Code: %d, error: %s", response.code(), responseString));
