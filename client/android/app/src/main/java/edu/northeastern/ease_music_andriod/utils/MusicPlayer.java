@@ -6,28 +6,22 @@ import android.media.AudioAttributes;
 import android.media.MediaDataSource;
 import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
-import android.os.Environment;
 import android.os.Process;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantLock;
 
 import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItem;
 
@@ -53,7 +47,6 @@ public class MusicPlayer extends MediaPlayer {
     private static final String AUDIO_DIR = "AUDIOS";
     private final AtomicBoolean isDownloaded = new AtomicBoolean(false);
     private final AtomicBoolean isOnDownloading = new AtomicBoolean(false);
-    private final AtomicBoolean isFavorite = new AtomicBoolean(false);
 
     private MusicPlayer() {
         super();
@@ -147,9 +140,9 @@ public class MusicPlayer extends MediaPlayer {
                 @Override
                 public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int i) {
                     if (onWaveGeneratedCallback != null)
-                        onWaveGeneratedCallback.onWaveGenerated(bytes);
+                        onWaveGeneratedCallback.onWaveGenerated(bytes, getMusicUuid());
 
-                    if (rootContext != null)
+                    if (vibrator != null)
                         vibrator.vibrate(getVibrateEffect(bytes));
                 }
             }, Visualizer.getMaxCaptureRate(), false, true);
@@ -375,7 +368,7 @@ public class MusicPlayer extends MediaPlayer {
     }
 
     public interface OnWaveGeneratedCallback {
-        void onWaveGenerated(byte[] waves);
+        void onWaveGenerated(byte[] waves, String uuid);
     }
     public interface OnDownloadCompletedCallback {
         void onSuccess();

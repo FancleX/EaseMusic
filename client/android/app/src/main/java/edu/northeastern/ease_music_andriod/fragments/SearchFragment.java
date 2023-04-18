@@ -192,10 +192,23 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
         item.setChecked(true);
 
         fragmentTransaction.replace(R.id.frame_layout, new MusicFragment());
+        fragmentTransaction.addToBackStack("MusicFragment");
+
+        fragmentTransaction.commit();
+
+        renderMiniPlayerFragment();
+    }
+
+    private void renderMiniPlayerFragment() {
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+
         fragmentTransaction.replace(R.id.top_view_panel, new MiniPlayerFragment());
 
         fragmentTransaction.commit();
     }
+
 
     @Override
     public void onNext(String nextMusicId, int nextPosition) {

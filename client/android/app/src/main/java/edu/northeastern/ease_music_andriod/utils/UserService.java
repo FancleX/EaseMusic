@@ -35,9 +35,108 @@ public class UserService {
         this.onRequestResultListener = requestResultListener;
     }
 
-    public void signIn() {}
+   public void signIn(String email, String password) {
+        requestGenerator.signIn(email, password, new APIRequestGenerator.RequestCallback() {
+            @Override
+            public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
+                try {
+                    String token = response.getString("token");
 
-    public void signUp() {}
+                    dataCache.getUserCache().setToken(token);
+                    dataCache.getUserCache().setUsername(email);
+
+                    if (onRequestResultListener != null)
+                        onRequestResultListener.onSuccess("Successfully sign in", RequestAPIs.APILabel.SIGNIN);
+
+                    getFavorites(token);
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage, RequestAPIs.APILabel label) {
+                Log.e(TAG, label.toString() + ": " + errorMessage);
+                if (onRequestResultListener != null)
+                    onRequestResultListener.onError("Unable to sign in: " + errorMessage, RequestAPIs.APILabel.SIGNIN);
+            }
+        });
+   }
+
+   public void signUp(String username, String email, String password) {
+        requestGenerator.signUp(email, username, password, new APIRequestGenerator.RequestCallback() {
+            @Override
+            public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
+                try {
+                    String token = response.getString("token");
+
+                    dataCache.getUserCache().setToken(token);
+                    dataCache.getUserCache().setUsername(email);
+
+                    if (onRequestResultListener != null)
+                        onRequestResultListener.onSuccess("Successfully sign up", RequestAPIs.APILabel.SIGNUP);
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage, RequestAPIs.APILabel label) {
+                Log.e(TAG, label.toString() + ": " + errorMessage);
+                if (onRequestResultListener != null)
+                    onRequestResultListener.onError("Unable to sign up: " + errorMessage, RequestAPIs.APILabel.SIGNUP);
+            }
+        });
+   }
+
+   private void getFavorites(String token) {
+       DataCache.UserCache userCache = dataCache.getUserCache();
+
+       requestGenerator.getFavorites(
+               token,
+               0,
+               Integer.MAX_VALUE,
+               new APIRequestGenerator.RequestCallback() {
+                   @Override
+                   public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
+                       try {
+                           JSONArray favoriteList = response.getJSONArray("favorites");
+
+                           List<MusicItem> favorites = new ArrayList<>();
+                           for (int i = 0; i < favoriteList.length(); i++) {
+                               JSONObject favoriteItem = favoriteList.getJSONObject(i);
+
+                               String uuid = favoriteItem.getString("uuid");
+                               String title = favoriteItem.getString("title");
+                               String author = favoriteItem.getString("author");
+                               String description = favoriteItem.getString("description");
+                               String thumbnail = favoriteItem.getString("thumbnail");
+
+                               favorites.add(new MusicItem(
+                                       uuid,
+                                       title,
+                                       author,
+                                       description,
+                                       thumbnail
+                               ));
+                           }
+
+                           userCache.setFavorites(favorites);
+                       } catch (JSONException e) {
+                           Log.e(TAG, e.getMessage());
+                       }
+                   }
+
+                   @Override
+                   public void onError(String errorMessage, RequestAPIs.APILabel label) {
+                       Log.e(TAG, label.toString() + ": " + errorMessage);
+                       if (onRequestResultListener != null)
+                           onRequestResultListener.onError("Unable to fetch favorites: " + errorMessage, RequestAPIs.APILabel.GET_FAVORITES);
+                   }
+               });
+
+   }
+
 
     public void addToFavorite(String uuid) {
         DataCache.UserCache userCache = dataCache.getUserCache();
@@ -45,8 +144,8 @@ public class UserService {
         requestGenerator.addFavorites(
                 dataCache.getUserCache().getToken(),
                 uuid,
-                userCache.getCurrentFavoritesIndex(),
-                5,
+                0,
+                Integer.MAX_VALUE,
                 new APIRequestGenerator.RequestCallback() {
                     @Override
                     public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
@@ -72,9 +171,9 @@ public class UserService {
                                 ));
                             }
 
-                            userCache.setFavorites(favorites, 0);
+                            userCache.setFavorites(favorites);
                             if (onRequestResultListener != null)
-                                onRequestResultListener.onSuccess(OnRequestResultListener.EventType.ADD);
+                                onRequestResultListener.onSuccess("Successfully added", RequestAPIs.APILabel.ADD_FAVORITES);
 
                         } catch (JSONException e) {
                             Log.e(TAG, e.getMessage());
@@ -85,20 +184,19 @@ public class UserService {
                     public void onError(String errorMessage, RequestAPIs.APILabel label) {
                         Log.e(TAG, label.toString() + ": " + errorMessage);
                         if (onRequestResultListener != null)
-                            onRequestResultListener.onError(errorMessage, OnRequestResultListener.EventType.ADD);
+                            onRequestResultListener.onError("Unable to add: " + errorMessage, RequestAPIs.APILabel.ADD_FAVORITES);
                     }
                 });
     }
 
     public void removeFavorites(String uuid) {
         DataCache.UserCache userCache = dataCache.getUserCache();
-        int index = userCache.queryIndexById(uuid);
 
         requestGenerator.removeFavorites(
                 dataCache.getUserCache().getToken(),
                 uuid,
-                userCache.getCurrentFavoritesIndex(),
-                5,
+                0,
+                Integer.MAX_VALUE,
                 new APIRequestGenerator.RequestCallback() {
                     @Override
                     public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
@@ -124,9 +222,9 @@ public class UserService {
                                 ));
                             }
 
-                            userCache.setFavorites(favorites, index);
+                            userCache.setFavorites(favorites);
                             if (onRequestResultListener != null)
-                                onRequestResultListener.onSuccess(OnRequestResultListener.EventType.REMOVE);
+                                onRequestResultListener.onSuccess("Successfully removed", RequestAPIs.APILabel.REMOVE_FAVORITES);
 
                         } catch (JSONException e) {
                             Log.e(TAG, e.getMessage());
@@ -137,23 +235,15 @@ public class UserService {
                     public void onError(String errorMessage, RequestAPIs.APILabel label) {
                         Log.e(TAG, label.toString() + ": " + errorMessage);
                         if (onRequestResultListener != null)
-                            onRequestResultListener.onError(errorMessage, OnRequestResultListener.EventType.REMOVE);
+                            onRequestResultListener.onError("Unable to remove: " + errorMessage, RequestAPIs.APILabel.REMOVE_FAVORITES);
                     }
                 });
     }
-    public void loadMoreFavorites() {
-
-    }
 
     public interface OnRequestResultListener {
-        enum EventType {
-            ADD,
-            REMOVE,
-            GET
-        }
 
-        void onSuccess(EventType eventType);
-        void onError(String error, EventType eventType);
+        void onSuccess(String message, RequestAPIs.APILabel label);
+        void onError(String error, RequestAPIs.APILabel label);
     }
 
 }

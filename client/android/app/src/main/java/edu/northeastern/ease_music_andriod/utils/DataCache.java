@@ -97,15 +97,12 @@ public class DataCache {
     }
 
     public static class UserCache {
-        private String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmYW5jbGVAZ21haWwuY29tIiwiaWF0IjoxNjgxMDc5NjIzLCJleHAiOjE2ODExNjYwMjN9.jBjupD4MPLsanfycCE3WVfZeUELzc8Vl2ihLJ8puicE";
+        private String token;
         private String username;
-        private final Map<Integer, List<MusicItem>> favoritesMap;
-        private final AtomicBoolean isLogin = new AtomicBoolean(true);
-        private int currentFavoritesIndex = 0;
-        private boolean hasNoMoreData;
+        private List<MusicItem> favorites;
 
         public UserCache() {
-            this.favoritesMap = new TreeMap<>();
+            this.favorites = new ArrayList<>();
         }
 
         public String getToken() {
@@ -124,52 +121,22 @@ public class DataCache {
             this.username = username;
         }
 
+        public boolean isUserLogin() {
+            return token != null;
+        }
+
         public List<MusicItem> getFavorites() {
-            final List<MusicItem> list = new ArrayList<>();
-            favoritesMap.values().forEach(list::addAll);
-
-            return list;
+            return favorites;
         }
 
-        public void setFavorites(List<MusicItem> favorites, int index) {
-            if (favorites.isEmpty()) {
-                hasNoMoreData = true;
-                return;
-            }
-
-            favoritesMap.put(index, favorites);
-            Log.i("Data cache", favoritesMap.toString());
-        }
-
-        public int queryIndexById(String uuid) {
-            for (Map.Entry<Integer, List<MusicItem>> entry : favoritesMap.entrySet()) {
-                List<MusicItem> musicItems = entry.getValue();
-
-                boolean anyMatch = musicItems.stream().anyMatch(item -> item.getUuid().equals(uuid));
-
-                if (anyMatch)
-                    return entry.getKey();
-            }
-
-            return -1;
+        public void setFavorites(List<MusicItem> favorites) {
+            this.favorites = favorites;
         }
 
         public boolean checkFavoriteById(String uuid) {
             List<MusicItem> favorites = getFavorites();
 
             return favorites.stream().anyMatch(musicItem -> musicItem.getUuid().equals(uuid));
-        }
-
-        public int getCurrentFavoritesIndex() {
-            return currentFavoritesIndex;
-        }
-
-        public void setCurrentFavoritesIndex(int currentFavoritesIndex) {
-            this.currentFavoritesIndex = currentFavoritesIndex;
-        }
-
-        public boolean isUserLogin() {
-            return isLogin.get();
         }
     }
 }

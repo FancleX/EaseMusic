@@ -132,6 +132,7 @@ public class MusicFragment extends Fragment {
         shareIcon.setOnClickListener(view -> shareMusic());
         addFavoriteIcon.setOnClickListener(view -> {
             if (!DataCache.getInstance().getUserCache().isUserLogin()) {
+                Toast.makeText(getContext(), "Please login first", Toast.LENGTH_SHORT).show();
                 toggleLoginFragment();
             } else {
                 DataCache.UserCache userCache = DataCache.getInstance().getUserCache();
@@ -228,6 +229,7 @@ public class MusicFragment extends Fragment {
         item.setChecked(true);
 
         fragmentTransaction.replace(R.id.frame_layout, new LoginFragment());
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 

@@ -70,9 +70,7 @@ public class APIRequestGenerator implements RequestAPIs {
         try {
             jsonObject.put("email", email);
             jsonObject.put("password", password);
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
-        }
+        } catch (JSONException ignored) {}
 
         RequestBody requestBody = RequestBody.create(jsonObject.toString(),MediaType.parse("application/json"));
 
@@ -136,11 +134,7 @@ public class APIRequestGenerator implements RequestAPIs {
             jsonObject.put("email", email);
             jsonObject.put("username", username);
             jsonObject.put("password", password);
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
-            callback.onError(e.getMessage(), APILabel.SIGNUP);
-            return;
-        }
+        } catch (JSONException ignored) {}
 
         RequestBody requestBody = RequestBody.create(jsonObject.toString(), mediaType);
         Request request = new Request.Builder()
@@ -192,8 +186,13 @@ public class APIRequestGenerator implements RequestAPIs {
                 .readTimeout(1, TimeUnit.MINUTES)
                 .build();
 
-        MediaType mediaType = MediaType.parse("application/json");
-        RequestBody requestBody = RequestBody.create(mediaType, "{\"username\": \"" + username + "\"}");
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("username", username);
+        } catch (JSONException ignored) {}
+
+        RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json"));
 
         Request request = new Request.Builder()
                 .url(url)
@@ -249,11 +248,7 @@ public class APIRequestGenerator implements RequestAPIs {
         try {
             jsonObject.put("new_password", newPassword);
             jsonObject.put("old_password", oldPassword);
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
-            callback.onError(e.getMessage(), APILabel.UPDATE_PASSWORD);
-            return;
-        }
+        } catch (JSONException ignored) {}
 
         RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json"));
 
@@ -313,6 +308,8 @@ public class APIRequestGenerator implements RequestAPIs {
         Request request = new Request.Builder()
                 .url(url)
                 .method(method, null)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -329,9 +326,13 @@ public class APIRequestGenerator implements RequestAPIs {
                     try {
                         String responseString = response.body().string();
 
+                        if (responseString.isEmpty()) {
+                            callback.onError(EMPTY_RESPONSE_BODY_ERROR, APILabel.GET_FAVORITES);
+                            return;
+                        }
+
                         if (response.code() == 200) {
-                            JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("data", jsonObject);
+                            JSONObject jsonObject = new JSONObject(responseString);
 
                             Log.i(TAG, jsonObject.toString());
                             callback.onSuccess(jsonObject, APILabel.GET_FAVORITES);
@@ -343,6 +344,7 @@ public class APIRequestGenerator implements RequestAPIs {
                             Log.e(TAG, response.toString());
                         }
                     } catch (JSONException e) {
+                        e.printStackTrace();
                         Log.e(TAG, e.getMessage());
                     }
                     return;
@@ -556,7 +558,7 @@ public class APIRequestGenerator implements RequestAPIs {
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .callTimeout(1, TimeUnit.MINUTES)
-                .readTimeout(1, TimeUnit.MINUTES)
+                .readTimeout(90, TimeUnit.SECONDS)
                 .build();
 
         Request request = new Request.Builder()

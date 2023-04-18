@@ -91,6 +91,7 @@ public class MiniPlayerFragment extends Fragment {
         fragmentTransaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
 
         fragmentTransaction.replace(R.id.frame_layout, new MusicFragment());
+        fragmentTransaction.addToBackStack("MusicFragment");
 
         fragmentTransaction.commit();
     }

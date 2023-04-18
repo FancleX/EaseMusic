@@ -20,7 +20,7 @@
         android:id="@+id/logo_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Memeber Login"
+        android:text="Member Login"
         android:textSize="30sp"
         android:layout_gravity="center"
         android:textColor="@color/black"/>
@@ -46,8 +46,8 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/username_input_in_login_page"
-            android:hint="Username"
+            android:id="@+id/email_input_in_login_page"
+            android:hint="Email"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
