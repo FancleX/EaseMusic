@@ -17,15 +17,17 @@
             android:id="@+id/music_player_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:ellipsize="marquee"
             android:fontFamily="@font/lilita_one"
             android:gravity="center"
-            android:text="@string/music_title"
-            android:textSize="30sp"
-            android:singleLine="true"
-            android:ellipsize="marquee"
             android:padding="5dp"
-            />
+            android:singleLine="true"
+            android:text="@string/music_title"
+            android:textSize="30sp" />
 
         <TextView
             android:id="@+id/music_player_author"

@@ -11,11 +11,14 @@ import androidx.fragment.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONObject;
+
+import java.util.Objects;
 
 import edu.northeastern.ease_music_andriod.R;
 import edu.northeastern.ease_music_andriod.utils.APIRequestGenerator;
@@ -81,20 +84,11 @@ public class LoginFragment extends Fragment {
         return true;
     }
 
-//    private void switchToUserProfile() {
-//        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//
-//        fragmentTransaction.replace(R.id.frame_layout, new UserProfileFragment());
-//        fragmentTransaction.addToBackStack(null);
-//        fragmentTransaction.commit();
-//    }
-
     private void switchToSignUpPage() {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frame_layout, new SignUpFragment());
-        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.addToBackStack("SignUpFragment");
         fragmentTransaction.commit();
     }
 }

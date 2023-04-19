@@ -6,36 +6,171 @@
     android:layout_height="match_parent"
     tools:context=".fragments.UserProfileFragment"
     android:orientation="vertical"
-    android:background="#fff"
-    android:padding="20dp">
+    android:background="#fff">
 
-    <!-- TODO: Update blank fragment layout -->
 
-    <ImageView
-        android:id="@+id/logo_image"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:transitionName="logo_image"
-        android:layout_gravity="center"
-        android:src="@drawable/login"/>
-    <TextView
-        android:id="@+id/logo_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="username"
-        android:textSize="30sp"
-        android:layout_gravity="center"
-        android:textColor="@color/black"/>
+    <RelativeLayout
+        android:id="@+id/user_profile_header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:padding="20dp"
+        android:background="#D7F8EC">
 
-    <Button
-        android:id="@+id/sign_out"
+        <ImageView
+            android:id="@+id/profile_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:transitionName="logo_image"
+            android:layout_centerVertical="true"
+            android:src="@drawable/login"/>
+
+        <TextView
+            android:id="@+id/user_profile_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="user email"
+            android:textSize="20sp"
+            android:ellipsize="marquee"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/profile_image"
+            android:layout_marginStart="10dp"
+            android:fontFamily="@font/bungee"/>
+
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/user_profile_cards_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="5dp"
-        android:layout_marginTop="5dp"
-        android:elevation="0dp"
-        android:background="#FF0000"
-        android:text="Sign Out" />
+        android:padding="20dp"
+        android:layout_marginTop="-100dp"
+        >
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/favorite_card"
+            android:layout_width="0dp"
+            android:layout_height="125dp"
+            android:layout_weight="1"
+            app:cardElevation="10dp"
+            app:cardBackgroundColor="#B6F6DF"
+            android:layout_margin="10dp"
+            >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/favorite_list_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/playlist_add_check_24"
+                    android:layout_centerHorizontal="true" />
+
+                <TextView
+                    android:id="@+id/favorite_list"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="My Favorites"
+                    android:includeFontPadding="false"
+                    android:textSize="15sp"
+                    android:fontFamily="@font/bungee"
+                    android:layout_centerInParent="true" />
+
+                <TextView
+                    android:id="@+id/favorite_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/favorite_list"
+                    android:text="0"
+                    android:textSize="11sp"
+                    android:fontFamily="@font/bungee"
+                    android:layout_centerHorizontal="true" />
+
+            </RelativeLayout>
+
+
+        </com.google.android.material.card.MaterialCardView>
+
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="0dp"
+            android:layout_height="125dp"
+            android:layout_weight="1"
+            app:cardElevation="10dp"
+            app:cardBackgroundColor="#B6F6DF"
+            android:layout_margin="10dp"
+            >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/download_list_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/download_done_24"
+                    android:layout_centerHorizontal="true" />
+
+                <TextView
+                    android:id="@+id/download_list"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:fontFamily="@font/bungee"
+                    android:includeFontPadding="false"
+                    android:text="Downloads"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/download_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/download_list"
+                    android:text="0"
+                    android:textSize="11sp"
+                    android:fontFamily="@font/bungee"
+                    android:layout_centerHorizontal="true" />
+
+            </RelativeLayout>
+
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/user_profile_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="0dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="5dp"
+        >
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/user_profile_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/sign_out"
+            android:layout_marginBottom="5dp"
+            />
+
+        <Button
+            android:id="@+id/sign_out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="#FF0000"
+            android:elevation="0dp"
+            android:text="Sign Out"
+            android:layout_alignParentBottom="true"
+            />
+    </RelativeLayout>
 
 </LinearLayout >

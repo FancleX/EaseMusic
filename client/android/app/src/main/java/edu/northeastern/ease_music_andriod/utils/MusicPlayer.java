@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItem;
+import edu.northeastern.ease_music_andriod.recyclerViewComponents.musicItem.MusicItem;
 
 public class MusicPlayer extends MediaPlayer {
 

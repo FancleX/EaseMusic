@@ -229,7 +229,7 @@ public class MusicFragment extends Fragment {
         item.setChecked(true);
 
         fragmentTransaction.replace(R.id.frame_layout, new LoginFragment());
-        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.addToBackStack("LoginFragment");
         fragmentTransaction.commit();
     }
 

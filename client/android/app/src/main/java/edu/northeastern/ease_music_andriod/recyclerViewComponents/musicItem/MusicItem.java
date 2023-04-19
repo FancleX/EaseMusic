@@ -1,4 +1,4 @@
-package edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem;
+package edu.northeastern.ease_music_andriod.recyclerViewComponents.musicItem;
 
 public class MusicItem {
 

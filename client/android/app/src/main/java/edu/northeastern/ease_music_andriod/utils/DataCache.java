@@ -1,18 +1,9 @@
 package edu.northeastern.ease_music_andriod.utils;
 
-import android.util.Log;
-
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItem;
+import edu.northeastern.ease_music_andriod.recyclerViewComponents.musicItem.MusicItem;
 
 public class DataCache {
 
@@ -99,7 +90,7 @@ public class DataCache {
     public static class UserCache {
         private String token;
         private String username;
-        private List<MusicItem> favorites;
+        private ArrayList<MusicItem> favorites;
 
         public UserCache() {
             this.favorites = new ArrayList<>();
@@ -125,18 +116,24 @@ public class DataCache {
             return token != null;
         }
 
-        public List<MusicItem> getFavorites() {
-            return favorites;
+        public ArrayList<MusicItem> getFavorites() {
+            return favorites == null ? new ArrayList<>() : favorites;
         }
 
-        public void setFavorites(List<MusicItem> favorites) {
+        public void setFavorites(ArrayList<MusicItem> favorites) {
             this.favorites = favorites;
         }
 
         public boolean checkFavoriteById(String uuid) {
-            List<MusicItem> favorites = getFavorites();
+            ArrayList<MusicItem> favorites = getFavorites();
 
             return favorites.stream().anyMatch(musicItem -> musicItem.getUuid().equals(uuid));
+        }
+
+        public void clearUserCache() {
+            token = null;
+            username = null;
+            favorites = null;
         }
     }
 }

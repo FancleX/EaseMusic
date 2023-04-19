@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -14,6 +15,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.Locale;
 
 import edu.northeastern.ease_music_andriod.fragments.LoginFragment;
+import edu.northeastern.ease_music_andriod.fragments.MiniPlayerFragment;
 import edu.northeastern.ease_music_andriod.fragments.MusicFragment;
 import edu.northeastern.ease_music_andriod.R;
 import edu.northeastern.ease_music_andriod.fragments.SearchFragment;
@@ -64,8 +66,8 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
                                     Toast.LENGTH_SHORT
                             ).show();
 
-                            if (label.equals(RequestAPIs.APILabel.SIGNIN)) {
-                                replaceFragment(new UserProfileFragment(), false);
+                            if (label.equals(RequestAPIs.APILabel.SIGNIN) || label.equals(RequestAPIs.APILabel.SIGNUP)) {
+                                replaceFragment(new UserProfileFragment(), true);
                             }
                         }
                 );
@@ -83,29 +85,35 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
         });
 
         // register top panel
-        replaceTopPanelFragment(new TitleFragment());
+        if (!musicPlayer.isReady())
+            replaceTopPanelFragment(new TitleFragment());
+        else
+            replaceTopPanelFragment(new MiniPlayerFragment());
 
         // register bottom nav
-        replaceFragment(new SearchFragment(this), true);
+        replaceFragment(new SearchFragment(this), false);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-
-        MenuItem menuItem = bottomNav.getMenu().findItem(R.id.music);
-        menuItem.setEnabled(false);
 
         bottomNav.setOnItemSelectedListener(item -> {
             final int id = item.getItemId();
 
             if (id == R.id.search)
-                replaceFragment(new SearchFragment(this), false);
+                replaceFragment(new SearchFragment(this), true);
             else if (id == R.id.music) {
-                if (MusicPlayer.getInstance().getMusicUuid() != null) {
-                    replaceFragment(new MusicFragment(), false);
+                if (MusicPlayer.getInstance().isReady()) {
+                    if (bottomNav.getMenu().findItem(R.id.music).isChecked())
+                        return false;
+
+                    replaceFragment(new MusicFragment(), true);
+                } else {
+                    Toast.makeText(this, "Please select a music first", Toast.LENGTH_SHORT).show();
+                    return false;
                 }
             } else if (id == R.id.home)
                 if (!dataCache.getUserCache().isUserLogin())
-                    replaceFragment(new LoginFragment(), false);
+                    replaceFragment(new LoginFragment(), true);
                 else
-                    replaceFragment(new UserProfileFragment(), false);
+                    replaceFragment(new UserProfileFragment(), true);
 
             return true;
         });
@@ -122,13 +130,15 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
 
             BottomNavigationView navigationView = findViewById(R.id.bottom_navigation);
 
+            Log.i(TAG, "fragment name: " + name);
+
             if ("SearchFragment".equals(name)) {
                 MenuItem item = navigationView.getMenu().findItem(R.id.search);
                 item.setChecked(true);
             } else if ("MusicFragment".equals(name)) {
                 MenuItem item = navigationView.getMenu().findItem(R.id.music);
                 item.setChecked(true);
-            } else if ("LoginFragment".equals(name) || "SignUpFragment".equals(name)) {
+            } else if ("LoginFragment".equals(name) || "SignUpFragment".equals(name) || "UserProfileFragment".equals(name)) {
                 MenuItem item = navigationView.getMenu().findItem(R.id.home);
                 item.setChecked(true);
             }
@@ -141,15 +151,15 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
         }
     }
 
-    private void replaceFragment(Fragment fragment, boolean isDefault) {
+    private void replaceFragment(Fragment fragment, boolean addToStack) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
 
         fragmentTransaction.replace(R.id.frame_layout, fragment);
 
-        if (!isDefault)
-            fragmentTransaction.addToBackStack(null);
+        if (addToStack)
+            fragmentTransaction.addToBackStack(getFragmentLabel(fragment));
 
         fragmentTransaction.commit();
     }
@@ -170,6 +180,8 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
             return "MusicFragment";
         } else if (fragment instanceof LoginFragment) {
             return "LoginFragment";
+        } else if (fragment instanceof UserProfileFragment) {
+            return "UserProfileFragment";
         }
 
         return null;

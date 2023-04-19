@@ -134,20 +134,12 @@ public class SignUpFragment extends Fragment {
         return true;
     }
 
-    private void switchToUserProfile() {
-        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        fragmentTransaction.replace(R.id.frame_layout, new UserProfileFragment());
-        fragmentTransaction.commit();
-    }
-
     private void switchToLoginPage() {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         fragmentTransaction.replace(R.id.frame_layout, new LoginFragment());
-        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.addToBackStack("LoginFragment");
 
         fragmentTransaction.commit();
     }

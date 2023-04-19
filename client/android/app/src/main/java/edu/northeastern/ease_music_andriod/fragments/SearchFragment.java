@@ -32,8 +32,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import edu.northeastern.ease_music_andriod.R;
 import edu.northeastern.ease_music_andriod.activities.DashBoardActivity;
-import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItem;
-import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItemAdapter;
+import edu.northeastern.ease_music_andriod.recyclerViewComponents.musicItem.MusicItem;
+import edu.northeastern.ease_music_andriod.recyclerViewComponents.musicItem.MusicItemAdapter;
 import edu.northeastern.ease_music_andriod.utils.APIRequestGenerator;
 import edu.northeastern.ease_music_andriod.utils.DataCache;
 import edu.northeastern.ease_music_andriod.utils.MusicPlayer;
@@ -188,7 +188,6 @@ public class SearchFragment extends Fragment implements APIRequestGenerator.Requ
 
         BottomNavigationView navigationView = requireActivity().findViewById(R.id.bottom_navigation);
         MenuItem item = navigationView.getMenu().findItem(R.id.music);
-        item.setEnabled(true);
         item.setChecked(true);
 
         fragmentTransaction.replace(R.id.frame_layout, new MusicFragment());

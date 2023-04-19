@@ -8,8 +8,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
-import edu.northeastern.ease_music_andriod.recyclerViewComponents.MusicItem.MusicItem;
+import edu.northeastern.ease_music_andriod.recyclerViewComponents.musicItem.MusicItem;
 
 public class UserService {
 
@@ -45,11 +46,14 @@ public class UserService {
                     dataCache.getUserCache().setToken(token);
                     dataCache.getUserCache().setUsername(email);
 
+                    // synchronize the request
+                    CountDownLatch countDownLatch = new CountDownLatch(1);
+                    getFavorites(token, countDownLatch);
+                    countDownLatch.await();
+
                     if (onRequestResultListener != null)
                         onRequestResultListener.onSuccess("Successfully sign in", RequestAPIs.APILabel.SIGNIN);
-
-                    getFavorites(token);
-                } catch (JSONException e) {
+                } catch (JSONException | InterruptedException e) {
                     Log.e(TAG, e.getMessage());
                 }
             }
@@ -89,7 +93,7 @@ public class UserService {
         });
    }
 
-   private void getFavorites(String token) {
+   private void getFavorites(String token, CountDownLatch countDownLatch) {
        DataCache.UserCache userCache = dataCache.getUserCache();
 
        requestGenerator.getFavorites(
@@ -102,7 +106,7 @@ public class UserService {
                        try {
                            JSONArray favoriteList = response.getJSONArray("favorites");
 
-                           List<MusicItem> favorites = new ArrayList<>();
+                           ArrayList<MusicItem> favorites = new ArrayList<>();
                            for (int i = 0; i < favoriteList.length(); i++) {
                                JSONObject favoriteItem = favoriteList.getJSONObject(i);
 
@@ -124,12 +128,15 @@ public class UserService {
                            userCache.setFavorites(favorites);
                        } catch (JSONException e) {
                            Log.e(TAG, e.getMessage());
+                       } finally {
+                           countDownLatch.countDown();
                        }
                    }
 
                    @Override
                    public void onError(String errorMessage, RequestAPIs.APILabel label) {
                        Log.e(TAG, label.toString() + ": " + errorMessage);
+                       countDownLatch.countDown();
                        if (onRequestResultListener != null)
                            onRequestResultListener.onError("Unable to fetch favorites: " + errorMessage, RequestAPIs.APILabel.GET_FAVORITES);
                    }
@@ -152,7 +159,7 @@ public class UserService {
                         try {
                             JSONArray favoriteList = response.getJSONArray("favorites");
 
-                            List<MusicItem> favorites = new ArrayList<>();
+                            ArrayList<MusicItem> favorites = new ArrayList<>();
                             for (int i = 0; i < favoriteList.length(); i++) {
                                 JSONObject favoriteItem = favoriteList.getJSONObject(i);
 
@@ -203,7 +210,7 @@ public class UserService {
                         try {
                             JSONArray favoriteList = response.getJSONArray("favorites");
 
-                            List<MusicItem> favorites = new ArrayList<>();
+                            ArrayList<MusicItem> favorites = new ArrayList<>();
                             for (int i = 0; i < favoriteList.length(); i++) {
                                 JSONObject favoriteItem = favoriteList.getJSONObject(i);
 
