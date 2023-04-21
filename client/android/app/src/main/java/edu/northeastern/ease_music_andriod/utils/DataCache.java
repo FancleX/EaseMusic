@@ -1,7 +1,6 @@
 package edu.northeastern.ease_music_andriod.utils;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import edu.northeastern.ease_music_andriod.recyclerViewComponents.musicItem.MusicItem;
 
@@ -28,14 +27,15 @@ public class DataCache {
     public SearchCache<MusicItem> getSearchCache() {
         return searchCache;
     }
+
     public UserCache getUserCache() {
         return userCache;
     }
 
 
     public static class SearchCache<T> {
-        private int pageIndex;
         private final ArrayList<T> resultList;
+        private int pageIndex;
         private String queryString;
         private boolean hasNoMoreData;
 

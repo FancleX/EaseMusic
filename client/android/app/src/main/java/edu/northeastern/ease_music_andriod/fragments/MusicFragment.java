@@ -7,13 +7,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -24,6 +17,12 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.squareup.picasso.Picasso;
@@ -43,10 +42,10 @@ import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 public class MusicFragment extends Fragment {
 
+    private static final String TAG = "Music Fragment";
     // ================ fields ================
     private final MusicPlayer musicPlayer = MusicPlayer.getInstance();
     private final Handler handler = new Handler();
-    private static final String TAG = "Music Fragment";
     private final UIUpdater uiUpdater = new UIUpdater();
     private String currentMusicId = "";
 
@@ -94,7 +93,7 @@ public class MusicFragment extends Fragment {
                 .transform(new CropCircleTransformation())
                 .into(albumIcon);
 
-        coverAnimator = ObjectAnimator.ofFloat(albumCover, "rotation", 0f,  360f);
+        coverAnimator = ObjectAnimator.ofFloat(albumCover, "rotation", 0f, 360f);
         coverAnimator.setDuration(20000);
         coverAnimator.setRepeatCount(ObjectAnimator.INFINITE);
         coverAnimator.setRepeatMode(ObjectAnimator.RESTART);
@@ -166,10 +165,12 @@ public class MusicFragment extends Fragment {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
 
         requireActivity().runOnUiThread(uiUpdater);

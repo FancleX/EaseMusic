@@ -4,37 +4,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.UserProfileFragment"
     android:orientation="vertical"
-    android:background="#fff">
+    tools:context=".fragments.UserProfileFragment">
 
 
     <RelativeLayout
         android:id="@+id/user_profile_header_layout"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:padding="20dp"
-        android:background="#D7F8EC">
+        android:background="#A5FAFA"
+        android:padding="20dp">
 
         <ImageView
             android:id="@+id/profile_image"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:transitionName="logo_image"
             android:layout_centerVertical="true"
-            android:src="@drawable/login"/>
+            android:src="@drawable/login"
+            android:transitionName="logo_image" />
 
         <TextView
             android:id="@+id/user_profile_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="user email"
-            android:textSize="20sp"
-            android:ellipsize="marquee"
             android:layout_centerVertical="true"
-            android:layout_toEndOf="@+id/profile_image"
             android:layout_marginStart="10dp"
-            android:fontFamily="@font/bungee"/>
+            android:layout_toEndOf="@+id/profile_image"
+            android:ellipsize="marquee"
+            android:fontFamily="@font/bungee"
+            android:text="@string/user_email"
+            android:textSize="20sp" />
 
 
     </RelativeLayout>
@@ -43,19 +42,17 @@
         android:id="@+id/user_profile_cards_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="20dp"
         android:layout_marginTop="-100dp"
-        >
+        android:padding="20dp">
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/favorite_card"
             android:layout_width="0dp"
             android:layout_height="125dp"
-            android:layout_weight="1"
-            app:cardElevation="10dp"
-            app:cardBackgroundColor="#B6F6DF"
             android:layout_margin="10dp"
-            >
+            android:layout_weight="1"
+            app:cardBackgroundColor="#7CFAFA"
+            app:cardElevation="10dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -66,28 +63,28 @@
                     android:id="@+id/favorite_list_icon"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:src="@drawable/playlist_add_check_24"
-                    android:layout_centerHorizontal="true" />
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/playlist_add_check_24" />
 
                 <TextView
                     android:id="@+id/favorite_list"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="My Favorites"
-                    android:includeFontPadding="false"
-                    android:textSize="15sp"
+                    android:layout_centerInParent="true"
                     android:fontFamily="@font/bungee"
-                    android:layout_centerInParent="true" />
+                    android:includeFontPadding="false"
+                    android:text="@string/my_favorites"
+                    android:textSize="15sp" />
 
                 <TextView
                     android:id="@+id/favorite_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/favorite_list"
-                    android:text="0"
-                    android:textSize="11sp"
+                    android:layout_centerHorizontal="true"
                     android:fontFamily="@font/bungee"
-                    android:layout_centerHorizontal="true" />
+                    android:text="@string/_0"
+                    android:textSize="11sp" />
 
             </RelativeLayout>
 
@@ -98,11 +95,10 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="0dp"
             android:layout_height="125dp"
-            android:layout_weight="1"
-            app:cardElevation="10dp"
-            app:cardBackgroundColor="#B6F6DF"
             android:layout_margin="10dp"
-            >
+            android:layout_weight="1"
+            app:cardBackgroundColor="#7CFAFA"
+            app:cardElevation="10dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -113,8 +109,8 @@
                     android:id="@+id/download_list_icon"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:src="@drawable/download_done_24"
-                    android:layout_centerHorizontal="true" />
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/download_done_24" />
 
                 <TextView
                     android:id="@+id/download_list"
@@ -123,7 +119,7 @@
                     android:layout_centerInParent="true"
                     android:fontFamily="@font/bungee"
                     android:includeFontPadding="false"
-                    android:text="Downloads"
+                    android:text="@string/downloads"
                     android:textSize="15sp" />
 
                 <TextView
@@ -131,10 +127,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/download_list"
-                    android:text="0"
-                    android:textSize="11sp"
+                    android:layout_centerHorizontal="true"
                     android:fontFamily="@font/bungee"
-                    android:layout_centerHorizontal="true" />
+                    android:text="@string/_0"
+                    android:textSize="11sp" />
 
             </RelativeLayout>
 
@@ -147,30 +143,27 @@
         android:id="@+id/user_profile_bottom"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="0dp"
         android:paddingStart="20dp"
+        android:paddingTop="0dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="5dp"
-        >
+        android:paddingBottom="5dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/user_profile_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@id/sign_out"
-            android:layout_marginBottom="5dp"
-            />
+            android:layout_marginBottom="5dp" />
 
         <Button
             android:id="@+id/sign_out"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:layout_gravity="center"
             android:backgroundTint="#FF0000"
             android:elevation="0dp"
-            android:text="Sign Out"
-            android:layout_alignParentBottom="true"
-            />
+            android:text="@string/sign_out" />
     </RelativeLayout>
 
-</LinearLayout >
+</LinearLayout>

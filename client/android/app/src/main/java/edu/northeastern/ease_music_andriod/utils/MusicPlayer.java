@@ -27,26 +27,25 @@ import edu.northeastern.ease_music_andriod.recyclerViewComponents.musicItem.Musi
 
 public class MusicPlayer extends MediaPlayer {
 
+    private static final String TAG = "Music Player";
+    private static final String AUDIO_DIR = "AUDIOS";
     @SuppressLint("StaticFieldLeak")
     private static volatile MusicPlayer instance;
-    private static final String TAG = "Music Player";
     private final APIRequestGenerator requestGenerator = APIRequestGenerator.getInstance();
     private final DataCache dataCache = DataCache.getInstance();
+    private final AtomicBoolean isReady = new AtomicBoolean(false);
+    private final AtomicBoolean isDownloaded = new AtomicBoolean(false);
+    private final AtomicBoolean isOnDownloading = new AtomicBoolean(false);
     private CallbackActivity callbackActivity;
     private OnUpdateCallback onUpdateCallback;
     private OnWaveGeneratedCallback onWaveGeneratedCallback;
     private OnDownloadCompletedCallback onDownloadCompletedCallback;
-
     private Context rootContext;
-    private final AtomicBoolean isReady = new AtomicBoolean(false);
     private Visualizer visualizer;
     private Vibrator vibrator;
     private int musicIndex = -1;
     private volatile MusicItem musicItem;
     private byte[] musicBlob;
-    private static final String AUDIO_DIR = "AUDIOS";
-    private final AtomicBoolean isDownloaded = new AtomicBoolean(false);
-    private final AtomicBoolean isOnDownloading = new AtomicBoolean(false);
 
     private MusicPlayer() {
         super();
@@ -89,27 +88,35 @@ public class MusicPlayer extends MediaPlayer {
     public String getMusicAlbumIcon() {
         return musicItem.getThumbnail();
     }
+
     public int getMusicIndex() {
         return musicIndex;
     }
+
     public String getMusicUuid() {
         return musicItem.getUuid();
     }
+
     public boolean isReady() {
         return isReady.get();
     }
+
     public void attachCallbackActivity(CallbackActivity callbackActivity) {
         this.callbackActivity = callbackActivity;
     }
+
     public void attachOnUpdateCallback(OnUpdateCallback callback) {
         this.onUpdateCallback = callback;
     }
+
     public void attachOnWaveGeneratedCallback(OnWaveGeneratedCallback callback) {
         this.onWaveGeneratedCallback = callback;
     }
+
     public void attachRootContext(Context context) {
         rootContext = context;
     }
+
     public void attachOnDownloadCompletedCallback(OnDownloadCompletedCallback callback) {
         onDownloadCompletedCallback = callback;
     }
@@ -185,8 +192,7 @@ public class MusicPlayer extends MediaPlayer {
 
         if (hasDownloadedFile(getMusicUuid())) {
             readFromStorage(getMusicUuid());
-        }
-        else
+        } else
             sendAccessFileRequest();
     }
 
@@ -246,26 +252,27 @@ public class MusicPlayer extends MediaPlayer {
     }
 
     private void sendAccessFileRequest() {
-            requestGenerator.accessResource(musicItem.getUuid(), new APIRequestGenerator.RequestCallback() {
-                @Override
-                public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
-                    try {
-                        String encodedAudioFile = response.getString("data");
+        requestGenerator.accessResource(musicItem.getUuid(), new APIRequestGenerator.RequestCallback() {
+            @Override
+            public void onSuccess(JSONObject response, RequestAPIs.APILabel label) {
+                try {
+                    String encodedAudioFile = response.getString("data");
 
-                        setMusicSource(encodedAudioFile);
-                    } catch (JSONException | IOException e) {
-                        Log.e(TAG, e.getMessage());
-                    }
+                    setMusicSource(encodedAudioFile);
+                } catch (JSONException | IOException e) {
+                    Log.e(TAG, e.getMessage());
                 }
+            }
 
-                @Override
-                public void onError(String errorMessage, RequestAPIs.APILabel label) {
-                    Log.e(TAG, label.toString() + ": " + errorMessage);
-                    if (callbackActivity != null)
-                        callbackActivity.onError(errorMessage);
-                }
-            });
+            @Override
+            public void onError(String errorMessage, RequestAPIs.APILabel label) {
+                Log.e(TAG, label.toString() + ": " + errorMessage);
+                if (callbackActivity != null)
+                    callbackActivity.onError(errorMessage);
+            }
+        });
     }
+
     private void readFromStorage(String filename) {
         File dir = new File(rootContext.getExternalFilesDir(null), AUDIO_DIR);
         File file = new File(dir, String.format("%s.mp3", filename));
@@ -364,14 +371,17 @@ public class MusicPlayer extends MediaPlayer {
 
     public interface OnUpdateCallback {
         void onNext(String nextMusicId, int nextPosition);
+
         void onLast(String lastMusicId, int lastPosition);
     }
 
     public interface OnWaveGeneratedCallback {
         void onWaveGenerated(byte[] waves, String uuid);
     }
+
     public interface OnDownloadCompletedCallback {
         void onSuccess();
+
         void onError(String error);
     }
 }

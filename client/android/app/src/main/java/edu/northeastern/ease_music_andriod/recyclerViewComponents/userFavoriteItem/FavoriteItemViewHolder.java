@@ -1,9 +1,7 @@
 package edu.northeastern.ease_music_andriod.recyclerViewComponents.userFavoriteItem;
 
-import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;

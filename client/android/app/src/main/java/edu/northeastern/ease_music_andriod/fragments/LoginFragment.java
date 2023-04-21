@@ -1,6 +1,10 @@
 package edu.northeastern.ease_music_andriod.fragments;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -8,21 +12,12 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.Button;
-
 import com.google.android.material.textfield.TextInputLayout;
-
-import org.json.JSONObject;
 
 import java.util.Objects;
 
 import edu.northeastern.ease_music_andriod.R;
-import edu.northeastern.ease_music_andriod.utils.APIRequestGenerator;
-import edu.northeastern.ease_music_andriod.utils.RequestAPIs;
+import edu.northeastern.ease_music_andriod.utils.DBHandler;
 import edu.northeastern.ease_music_andriod.utils.UserService;
 
 public class LoginFragment extends Fragment {
@@ -48,6 +43,13 @@ public class LoginFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Button loginButton = view.findViewById(R.id.login_in_login_page);
         emailTextInput = view.findViewById(R.id.email_input_in_login_page);
+        try (DBHandler dbHandler = new DBHandler(requireContext())) {
+            String lastLoginUser = dbHandler.getLastLoginUser();
+
+            if (lastLoginUser != null)
+                Objects.requireNonNull(emailTextInput.getEditText()).setText(lastLoginUser);
+        }
+
         passwordTextInput = view.findViewById(R.id.password_input_in_login_page);
 
         loginButton.setOnClickListener(v -> login());
@@ -57,8 +59,8 @@ public class LoginFragment extends Fragment {
     }
 
     private void login() {
-        String email = emailTextInput.getEditText().getText().toString();
-        String password = passwordTextInput.getEditText().getText().toString();
+        String email = Objects.requireNonNull(emailTextInput.getEditText()).getText().toString();
+        String password = Objects.requireNonNull(passwordTextInput.getEditText()).getText().toString();
 
         if (isValid(email, password)) {
             userService.signIn(email, password);

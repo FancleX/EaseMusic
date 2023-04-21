@@ -1,7 +1,5 @@
 package edu.northeastern.ease_music_andriod.utils;
 
-import org.json.JSONObject;
-
 public interface RequestAPIs {
 
     // ============= Auth =============

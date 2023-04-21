@@ -1,26 +1,27 @@
 package edu.northeastern.ease_music_andriod.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.Locale;
+import java.util.Date;
 
+import edu.northeastern.ease_music_andriod.R;
 import edu.northeastern.ease_music_andriod.fragments.LoginFragment;
 import edu.northeastern.ease_music_andriod.fragments.MiniPlayerFragment;
 import edu.northeastern.ease_music_andriod.fragments.MusicFragment;
-import edu.northeastern.ease_music_andriod.R;
 import edu.northeastern.ease_music_andriod.fragments.SearchFragment;
 import edu.northeastern.ease_music_andriod.fragments.TitleFragment;
 import edu.northeastern.ease_music_andriod.fragments.UserProfileFragment;
+import edu.northeastern.ease_music_andriod.utils.DBHandler;
 import edu.northeastern.ease_music_andriod.utils.DataCache;
 import edu.northeastern.ease_music_andriod.utils.MusicPlayer;
 import edu.northeastern.ease_music_andriod.utils.RequestAPIs;
@@ -67,7 +68,10 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
                             ).show();
 
                             if (label.equals(RequestAPIs.APILabel.SIGNIN) || label.equals(RequestAPIs.APILabel.SIGNUP)) {
-                                replaceFragment(new UserProfileFragment(), true);
+                                try (DBHandler dbHandler = new DBHandler(getApplicationContext())) {
+                                    dbHandler.insertOrUpdateUserProfile(dataCache.getUserCache().getUsername(), null, new Date(System.currentTimeMillis()));
+                                    replaceFragment(new UserProfileFragment(), true);
+                                }
                             }
                         }
                 );
@@ -77,10 +81,10 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
             public void onError(String error, RequestAPIs.APILabel label) {
                 runOnUiThread(() ->
                         Toast.makeText(
-                        DashBoardActivity.this,
-                        error,
-                        Toast.LENGTH_SHORT
-                ).show());
+                                DashBoardActivity.this,
+                                error,
+                                Toast.LENGTH_SHORT
+                        ).show());
             }
         });
 
@@ -97,9 +101,12 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
         bottomNav.setOnItemSelectedListener(item -> {
             final int id = item.getItemId();
 
-            if (id == R.id.search)
+            if (id == R.id.search) {
+                if (bottomNav.getMenu().findItem(R.id.search).isChecked())
+                    return false;
+
                 replaceFragment(new SearchFragment(this), true);
-            else if (id == R.id.music) {
+            } else if (id == R.id.music) {
                 if (MusicPlayer.getInstance().isReady()) {
                     if (bottomNav.getMenu().findItem(R.id.music).isChecked())
                         return false;
@@ -109,11 +116,15 @@ public class DashBoardActivity extends AppCompatActivity implements MusicPlayer.
                     Toast.makeText(this, "Please select a music first", Toast.LENGTH_SHORT).show();
                     return false;
                 }
-            } else if (id == R.id.home)
+            } else if (id == R.id.home) {
+                if (bottomNav.getMenu().findItem(R.id.home).isChecked())
+                    return false;
+
                 if (!dataCache.getUserCache().isUserLogin())
                     replaceFragment(new LoginFragment(), true);
                 else
                     replaceFragment(new UserProfileFragment(), true);
+            }
 
             return true;
         });

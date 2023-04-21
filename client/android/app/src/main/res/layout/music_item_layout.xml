@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="50dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginTop="10dp"
+    app:cardBackgroundColor="@android:color/transparent"
     app:cardCornerRadius="5dp"
-    app:cardElevation="3dp"
-    app:cardBackgroundColor="#F3D6E6F4"
->
+    app:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -43,6 +42,7 @@
                 android:paddingTop="5dp"
                 android:paddingEnd="5dp"
                 android:text="@string/music_title"
+                android:textColor="#000000"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -61,6 +61,7 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="5dp"
                     android:text="@string/music_author"
+                    android:textColor="#000000"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -75,6 +76,7 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="5dp"
                     android:text="@string/music_divider"
+                    android:textColor="#000000"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -89,6 +91,7 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="5dp"
                     android:text="@string/music_description"
+                    android:textColor="#000000"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 

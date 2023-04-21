@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
-
 import edu.northeastern.ease_music_andriod.R;
 import edu.northeastern.ease_music_andriod.utils.MusicPlayer;
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
 public class MusicItemViewHolder extends RecyclerView.ViewHolder {
 
@@ -44,6 +44,7 @@ public class MusicItemViewHolder extends RecyclerView.ViewHolder {
                 .load(item.getThumbnail())
                 .resize(50, 50)
                 .centerCrop()
+                .transform(new RoundedCornersTransformation(8, 0))
                 .into(thumbnail);
 
         title.setText(item.getTitle());

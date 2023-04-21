@@ -15,9 +15,7 @@ import java.util.regex.Pattern;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -25,8 +23,7 @@ import okhttp3.Response;
 
 public class APIRequestGenerator implements RequestAPIs {
 
-    private static volatile APIRequestGenerator instance;
-    private static final String[] URLS = new String[] {
+    private static final String[] URLS = new String[]{
             "http://100.25.191.181:9000/api/v1/auth/signIn",
             "http://100.25.191.181:9000/api/v1/auth/signUp",
             "http://100.25.191.181:9000/api/v1/user/update/username",
@@ -37,15 +34,17 @@ public class APIRequestGenerator implements RequestAPIs {
             "http://100.25.191.181:9000/api/v1/search/results?search_query=%s&page_index=%d",
             "http://100.25.191.181:9000/api/v1/search/detail?uuid=%s"
     };
-    private static final String[] METHODS = new String[] {
+    private static final String[] METHODS = new String[]{
             "GET",
             "POST",
             "PUT"
     };
     private static final String EMPTY_RESPONSE_BODY_ERROR = "Request failed";
     private static final String TAG = "API Request Generator";
+    private static volatile APIRequestGenerator instance;
 
-    private APIRequestGenerator() {}
+    private APIRequestGenerator() {
+    }
 
     public static APIRequestGenerator getInstance() {
         if (instance == null) {
@@ -70,9 +69,10 @@ public class APIRequestGenerator implements RequestAPIs {
         try {
             jsonObject.put("email", email);
             jsonObject.put("password", password);
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
-        RequestBody requestBody = RequestBody.create(jsonObject.toString(),MediaType.parse("application/json"));
+        RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json"));
 
         Request request = new Request.Builder()
                 .url(url)
@@ -134,7 +134,8 @@ public class APIRequestGenerator implements RequestAPIs {
             jsonObject.put("email", email);
             jsonObject.put("username", username);
             jsonObject.put("password", password);
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         RequestBody requestBody = RequestBody.create(jsonObject.toString(), mediaType);
         Request request = new Request.Builder()
@@ -190,7 +191,8 @@ public class APIRequestGenerator implements RequestAPIs {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("username", username);
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json"));
 
@@ -248,7 +250,8 @@ public class APIRequestGenerator implements RequestAPIs {
         try {
             jsonObject.put("new_password", newPassword);
             jsonObject.put("old_password", oldPassword);
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json"));
 
@@ -369,7 +372,8 @@ public class APIRequestGenerator implements RequestAPIs {
             jsonObject.put("uuid", uuid);
             jsonObject.put("currentIndex", String.valueOf(currentIndex));
             jsonObject.put("limit", String.valueOf(limit));
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json"));
 
@@ -437,7 +441,8 @@ public class APIRequestGenerator implements RequestAPIs {
             jsonObject.put("uuid", uuid);
             jsonObject.put("currentIndex", String.valueOf(currentIndex));
             jsonObject.put("limit", String.valueOf(limit));
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json"));
 
@@ -558,7 +563,7 @@ public class APIRequestGenerator implements RequestAPIs {
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .callTimeout(1, TimeUnit.MINUTES)
-                .readTimeout(90, TimeUnit.SECONDS)
+                .readTimeout(2, TimeUnit.MINUTES)
                 .build();
 
         Request request = new Request.Builder()

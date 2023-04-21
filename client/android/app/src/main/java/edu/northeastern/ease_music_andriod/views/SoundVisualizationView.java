@@ -12,12 +12,8 @@ import java.util.Random;
 import edu.northeastern.ease_music_andriod.utils.MusicPlayer;
 
 public class SoundVisualizationView extends View implements MusicPlayer.OnWaveGeneratedCallback {
-    private final Paint paint;
-    private byte[] waveform;
-    private String musicUuid;
-    private int currentTheme;
     private static final int COLORS = 21;
-
+    private final Paint paint;
     private final int[][] themes = {
             {
                     Color.parseColor("#F2F3E2"),
@@ -112,6 +108,9 @@ public class SoundVisualizationView extends View implements MusicPlayer.OnWaveGe
                     Color.parseColor("#E98FC0")
             }
     };
+    private byte[] waveform;
+    private String musicUuid;
+    private int currentTheme;
 
 
     public SoundVisualizationView(Context context, AttributeSet attrs) {
@@ -119,6 +118,7 @@ public class SoundVisualizationView extends View implements MusicPlayer.OnWaveGe
 
         paint = new Paint();
         paint.setStrokeWidth(5f);
+        paint.setAntiAlias(true);
     }
 
     @Override

@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.TitleFragment">
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="50dp"
         app:cardBackgroundColor="@color/primary_color"
-        app:cardElevation="5dp"
-        >
+        app:cardElevation="5dp">
 
         <ImageView
             android:layout_width="100dp"
             android:layout_height="50dp"
             android:layout_gravity="start"
-            android:padding="5dp"
-            android:foregroundGravity="center_vertical"
             android:layout_marginStart="10dp"
+            android:foregroundGravity="center_vertical"
+            android:padding="5dp"
             android:src="@drawable/logo" />
 
         <TextView

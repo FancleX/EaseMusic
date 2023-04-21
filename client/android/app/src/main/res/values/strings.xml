@@ -18,4 +18,21 @@
     <string name="music_author">music author</string>
     <string name="music_divider">-</string>
     <string name="music_description">music description</string>
+    <string name="member_login">Member Login</string>
+    <string name="new_user_sign_up">New User? SIGN UP</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="already_have_an_account_sign_in">Already have an account? SIGN In</string>
+    <string name="username">Username</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="my_favorites">My Favorites</string>
+    <string name="_0">0</string>
+    <string name="user_email">user email</string>
+    <string name="downloads">Downloads</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="search">Search</string>
+    <string name="music">Music</string>
+    <string name="home">Home</string>
 </resources>

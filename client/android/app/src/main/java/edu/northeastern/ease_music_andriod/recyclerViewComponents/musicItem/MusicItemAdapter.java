@@ -24,8 +24,8 @@ import edu.northeastern.ease_music_andriod.utils.MusicPlayer;
 
 public class MusicItemAdapter extends RecyclerView.Adapter<MusicItemViewHolder> implements MusicItemViewHolder.OnMusicItemClickListener {
 
-    private ArrayList<MusicItem> musicList;
     private final SearchFragment mainFragment;
+    private ArrayList<MusicItem> musicList;
 
     public MusicItemAdapter(SearchFragment mainFragment) {
         this.mainFragment = mainFragment;

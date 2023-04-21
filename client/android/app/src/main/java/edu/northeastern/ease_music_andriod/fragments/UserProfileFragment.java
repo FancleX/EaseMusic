@@ -3,22 +3,10 @@ package edu.northeastern.ease_music_andriod.fragments;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Environment;
-import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,30 +19,49 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.card.MaterialCardView;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 import edu.northeastern.ease_music_andriod.R;
 import edu.northeastern.ease_music_andriod.recyclerViewComponents.userFavoriteItem.FavoriteItemAdapter;
+import edu.northeastern.ease_music_andriod.utils.DBHandler;
 import edu.northeastern.ease_music_andriod.utils.DataCache;
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 public class UserProfileFragment extends Fragment {
 
+    private static final String AUDIO_DIR = "AUDIOS";
+    private static final String TAG = "UserProfile Fragment";
+    private static final String IMAGE_DIR = "IMAGES";
     // ================ fields ================
     private final DataCache dataCache = DataCache.getInstance();
-    private static final String AUDIO_DIR = "AUDIOS";
     private FavoriteItemAdapter favoriteItemAdapter;
     private ActivityResultLauncher<String> requestCameraPermissionLauncher;
     private ActivityResultLauncher<Uri> takePictureLauncher;
     private ActivityResultLauncher<String> pickImageLauncher;
-
+    private Uri cameraImageUri;
 
     // ================ views ================
     private Button signOutButton;
@@ -108,12 +115,27 @@ public class UserProfileFragment extends Fragment {
         cardView.setOnClickListener(v -> favoriteRecycler.setVisibility(View.VISIBLE));
 
         profileImage.setOnClickListener(v -> changeProfileImage());
+        try (DBHandler db = new DBHandler(requireContext())) {
+            String imagePath = db.getUserImageUriByName(dataCache.getUserCache().getUsername());
+
+            if (imagePath != null) {
+                // clear image cache
+                Picasso.get().invalidate(new File(imagePath));
+
+                Picasso.get()
+                        .load(new File(imagePath))
+                        .resize(100, 100)
+                        .transform(new CropCircleTransformation())
+                        .into(profileImage);
+            }
+        }
 
         // Request camera permission
         requestCameraPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
                 // Permission granted, start camera
-                takePictureLauncher.launch(createImageFileUri());
+                cameraImageUri = createImageFileUri();
+                takePictureLauncher.launch(cameraImageUri);
             } else {
                 // Permission denied
                 Toast.makeText(requireContext(), "Camera permission denied", Toast.LENGTH_SHORT).show();
@@ -123,33 +145,22 @@ public class UserProfileFragment extends Fragment {
         // Take picture from camera
         takePictureLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), isTaken -> {
             if (isTaken) {
-                // Query the latest image file from MediaStore
-                String[] projection = { MediaStore.Images.ImageColumns.DATA };
-                String selection = MediaStore.Images.ImageColumns.DATE_TAKEN + "=?";
-                String[] selectionArgs = { String.valueOf(System.currentTimeMillis()) };
-                String sortOrder = MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC";
-                Cursor cursor = requireActivity().getContentResolver().query(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        projection,
-                        selection,
-                        selectionArgs,
-                        sortOrder
-                );
-
-                // Get the image file path
-                String imagePath = null;
-                if (cursor != null && cursor.moveToFirst()) {
-                    imagePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATA));
-                    cursor.close();
-                }
-
-                // Display the image
-                if (imagePath != null) {
+                if (cameraImageUri != null) {
                     Picasso.get()
-                            .load(new File(imagePath))
+                            .load(cameraImageUri)
                             .resize(100, 100)
                             .transform(new CropCircleTransformation())
                             .into(profileImage);
+
+                    try (DBHandler dbHandler = new DBHandler(requireContext())) {
+                        byte[] bytes = readBytesFromUri(cameraImageUri);
+                        if (bytes != null) {
+                            String filePath = downloadImage(bytes);
+
+                            if (filePath != null)
+                                dbHandler.insertOrUpdateUserProfile(dataCache.getUserCache().getUsername(), filePath, null);
+                        }
+                    }
                 }
             }
         });
@@ -162,22 +173,33 @@ public class UserProfileFragment extends Fragment {
                         .resize(100, 100)
                         .transform(new CropCircleTransformation())
                         .into(profileImage);
+
+                try (DBHandler dbHandler = new DBHandler(requireContext())) {
+                    byte[] bytes = readBytesFromUri(result);
+
+                    if (bytes != null) {
+                        String filePath = downloadImage(bytes);
+
+                        if (filePath != null)
+                            dbHandler.insertOrUpdateUserProfile(dataCache.getUserCache().getUsername(), filePath, null);
+                    }
+                }
             }
         });
-
 
         return root;
     }
 
     private void changeProfileImage() {
-        final CharSequence[] options = { "Take Photo", "Choose from Gallery", "Cancel" };
+        final CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Choose an option");
+        builder.setTitle("Edit Profile Image");
         builder.setItems(options, (dialog, which) -> {
             if (options[which].equals("Take Photo")) {
                 if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                     // Permission granted, start camera
-                    takePictureLauncher.launch(createImageFileUri());
+                    cameraImageUri = createImageFileUri();
+                    takePictureLauncher.launch(cameraImageUri);
                 } else {
                     // Request camera permission
                     requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA);
@@ -206,6 +228,67 @@ public class UserProfileFragment extends Fragment {
             return FileProvider.getUriForFile(requireContext(), requireActivity().getPackageName() + ".fileprovider", imageFile);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public byte[] readBytesFromUri(Uri uri) {
+        try (InputStream inputStream = requireActivity().getContentResolver().openInputStream(uri);
+             ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream()) {
+
+            int bufferSize = 1024;
+            byte[] buffer = new byte[bufferSize];
+
+            int len;
+            while ((len = inputStream.read(buffer)) != -1) {
+                byteBuffer.write(buffer, 0, len);
+            }
+
+            return byteBuffer.toByteArray();
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        return null;
+    }
+
+    private String downloadImage(byte[] src) {
+        File dir = new File(requireContext().getExternalFilesDir(null), IMAGE_DIR);
+        if (!dir.exists())
+            dir.mkdir();
+
+        String usernameDigest = getUsernameDigest();
+        File file = new File(dir, String.format("%s.jpg", usernameDigest));
+
+        String filepath = file.getAbsolutePath();
+
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+            fileOutputStream.write(src);
+            fileOutputStream.flush();
+
+            return filepath;
+        } catch (IOException e) {
+            Log.i(TAG, e.getMessage());
+        }
+
+        return null;
+    }
+
+    private String getUsernameDigest() {
+        String username = dataCache.getUserCache().getUsername();
+
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            md5.update(dataCache.getUserCache().getUsername().getBytes(StandardCharsets.UTF_8));
+            byte[] digest = md5.digest();
+
+            StringBuilder sb = new StringBuilder();
+            for (byte d : digest)
+                sb.append(String.format("%02x", d));
+
+            return sb.toString();
+        } catch (NoSuchAlgorithmException ignored) {
         }
 
         return null;

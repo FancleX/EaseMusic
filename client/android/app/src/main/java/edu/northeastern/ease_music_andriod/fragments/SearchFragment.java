@@ -3,15 +3,6 @@ package edu.northeastern.ease_music_andriod.fragments;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.SearchView;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -20,6 +11,14 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -41,19 +40,18 @@ import edu.northeastern.ease_music_andriod.utils.RequestAPIs;
 
 public class SearchFragment extends Fragment implements APIRequestGenerator.RequestCallback, MusicPlayer.OnUpdateCallback {
 
+    private static final String TAG = "Search Fragment";
     // ================ fields ================
     private final APIRequestGenerator requestGenerator = APIRequestGenerator.getInstance();
     private final MusicPlayer musicPlayer = MusicPlayer.getInstance();
-    private static final String TAG = "Search Fragment";
     private final DataCache dataCache = DataCache.getInstance();
     private final AtomicBoolean onLoadingMoreData = new AtomicBoolean(false);
     private final AtomicBoolean onSearchProgress = new AtomicBoolean(false);
-
+    private final DashBoardActivity dashBoardActivity;
     // ================ views ================
     private SearchView searchBar;
     private RecyclerView musicRecycler;
     private MusicItemAdapter musicItemAdapter;
-    private final DashBoardActivity dashBoardActivity;
 
     public SearchFragment(DashBoardActivity dashBoardActivity) {
         this.dashBoardActivity = dashBoardActivity;

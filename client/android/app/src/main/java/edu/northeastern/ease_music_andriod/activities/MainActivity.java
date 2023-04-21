@@ -1,10 +1,6 @@
 package edu.northeastern.ease_music_andriod.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.WindowManager;
@@ -12,6 +8,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import edu.northeastern.ease_music_andriod.R;
 
