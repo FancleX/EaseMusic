@@ -11,6 +11,7 @@ Ease Music is an Android music application with sound visualization and beat vib
 <hr>
 
 ### Design:
+
 ![screenshot](./doc/design.png)
 
 <hr>
